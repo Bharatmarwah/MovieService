@@ -94,6 +94,8 @@ public class ShowService {
                 .showDate(savedShow.getShowDate())
                 .screenId(savedShow.getScreen().getScreenId())
                 .movieCode(savedShow.getMovie().getMovieCode())
+                .dayOfWeek(savedShow.getDayOfWeek())
+                .meridiem(savedShow.getMeridiem())
                 .build();
     }
 }

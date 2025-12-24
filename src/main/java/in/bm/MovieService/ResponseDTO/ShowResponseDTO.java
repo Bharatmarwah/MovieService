@@ -3,6 +3,7 @@ package in.bm.MovieService.ResponseDTO;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -16,9 +17,13 @@ public class ShowResponseDTO {
 
     private Long screenId;
 
+    private DayOfWeek dayOfWeek;
+
     private LocalDate showDate;
 
     private LocalTime showTime;
+
+    private String meridiem;
 
 
 

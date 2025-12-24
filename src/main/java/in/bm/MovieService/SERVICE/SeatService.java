@@ -68,8 +68,8 @@ public class SeatService {
                 seat.setScreen(screen);
                 seat.setSeatCategory(seatCategory);
                 seat.setActive(true);
-                seat.setWheelchair(dto.getIsWheelchair());
-                seat.setBlockedView(dto.getIsBlockedView());
+                seat.setWheelchair(dto.isWheelchair());
+                seat.setBlockedView(dto.isBlockedView());
 
                 seats.add(seat);
                 seatNumbers.add(seatNumber);
@@ -89,8 +89,8 @@ public class SeatService {
                 .seatCategoryId(seatCategory.getId())
                 .totalSeatsCreated(seats.size())
                 .seatNumbers(seatNumbers)
-                .isWheelchair(dto.getIsWheelchair())
-                .isBlockedView(dto.getIsBlockedView())
+                .isWheelchair(dto.isWheelchair())
+                .isBlockedView(dto.isBlockedView())
                 .build();
     }
 }

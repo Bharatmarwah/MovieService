@@ -6,6 +6,8 @@ import lombok.Setter;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 @Entity
 @Table(
@@ -44,9 +46,23 @@ public class Show {
     )
     private Movie movie;
 
+    private String meridiem;
+
     @PrePersist// runs before inserting
     @PreUpdate // runs before every update
     private void syncDayOfWeek() {
         this.dayOfWeek = this.showDate.getDayOfWeek();
+        this.meridiem = this.showTime
+                .format(DateTimeFormatter.ofPattern("a")).toUpperCase(Locale.ROOT);
     }
+
+//    private void syncMeridiem(){
+//        int hour = this.showTime.getHour();
+//        if (hour<12){
+//            this.meridiem = "AM";
+//        } else if (hour>=12) {
+//            this.meridiem = "PM";
+//        }
+//    }
+
 }

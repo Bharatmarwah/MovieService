@@ -22,11 +22,9 @@ public class SeatRequestDTO {
 
     @NotNull
     private Long seatCategoryId;
+    
+    private boolean isWheelchair;
 
-    @NotNull
-    private Boolean isWheelchair;
-
-    @NotNull
-    private Boolean isBlockedView;
+    private boolean isBlockedView;
 
 }
