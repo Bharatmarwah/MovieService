@@ -19,7 +19,6 @@ public class MovieController {
 
     private final MovieService movieService;
 
-
     //movies?page=0&size=10
     @GetMapping
     public ResponseEntity<MoviePageResponseDTO> getMovies
@@ -43,17 +42,16 @@ public class MovieController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    //localhost:8080/movies/search?q={}&page=0&size=10
     @GetMapping("/search")
-    public ResponseEntity<MoviePageResponseDTO> searchMovie(@RequestParam String q,
-                                                            @RequestParam int page,
-                                                            @RequestParam int size) {
-
+    public ResponseEntity<MoviePageResponseDTO> searchMovie(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
         MoviePageResponseDTO response = movieService.searchMovie(q, page, size);
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-
+        return ResponseEntity.ok(response);
     }
+
 
     //movies/{movieCode}
     @GetMapping("/{movieCode}")

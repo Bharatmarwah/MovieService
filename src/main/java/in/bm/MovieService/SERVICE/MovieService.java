@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -169,6 +170,10 @@ public class MovieService {
                     log.warn("Fetch rejected | movie not found movieCode={}", movieCode);
                     return new MovieNotFoundException("Movie not found with id: " + movieCode);
                 });
+
+        if (movie.getStatus() != MovieStatus.ACTIVE) {
+            throw new MovieInactiveException("Movie is no longer active");
+        }
 
         log.info("Movie fetched | movieCode={}", movieCode);
 
@@ -338,7 +343,7 @@ public class MovieService {
                         .certificate(movie.getCertificate())
                         .language(movie.getLanguage())
                         .build())
-                .toList();
+                .collect(Collectors.toList());
 
         return MoviePageResponseDTO.builder()
                 .movies(movies)
@@ -362,6 +367,7 @@ public class MovieService {
                 .mapToDouble(MovieReview::getRating)
                 .average()
                 .orElse(0.0);
+
 
         details.setAvgRating(avgRating);
         details.setTotalReviews(details.getMovieReviews().size());

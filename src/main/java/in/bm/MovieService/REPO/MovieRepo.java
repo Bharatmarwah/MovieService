@@ -14,16 +14,17 @@ import org.springframework.stereotype.Repository;
 public interface MovieRepo extends JpaRepository<Movie, String> {
 
     @Query("""
-        SELECT DISTINCT m
-        FROM Movie m
-        JOIN m.movieDetails md
-        WHERE m.status = :status
-          AND (
-                LOWER(m.movieName) LIKE LOWER(CONCAT(:q, '%'))
-             OR LOWER(md.movieType) LIKE LOWER(CONCAT(:q, '%'))
-             OR LOWER(m.language)  LIKE LOWER(CONCAT(:q, '%'))
-          )
-    """)
+    SELECT DISTINCT m
+    FROM Movie m
+    JOIN m.movieDetails md
+    LEFT JOIN md.movieType mt
+    WHERE m.status = :status
+      AND (
+            LOWER(m.movieName) LIKE LOWER(CONCAT(:q, '%'))
+         OR LOWER(mt) LIKE LOWER(CONCAT(:q, '%'))
+         OR LOWER(m.language) LIKE LOWER(CONCAT(:q, '%'))
+      )
+""")
     Page<Movie> searchAcrossFields(
             @Param("status") MovieStatus status,
             @Param("q") String q,
@@ -32,3 +33,4 @@ public interface MovieRepo extends JpaRepository<Movie, String> {
 
     Page<Movie> findByStatus(MovieStatus movieStatus, Pageable pageable);
 }
+
