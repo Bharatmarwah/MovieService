@@ -19,6 +19,7 @@ public class MovieController {
 
     private final MovieService movieService;
 
+
     //movies?page=0&size=10
     @GetMapping
     public ResponseEntity<MoviePageResponseDTO> getMovies
