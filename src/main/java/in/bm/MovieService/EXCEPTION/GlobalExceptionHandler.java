@@ -1,0 +1,127 @@
+package in.bm.MovieService.EXCEPTION;
+
+
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.time.LocalDateTime;
+import java.util.Map;
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<?> handleDatabaseErrors(DataAccessException ex){
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "error","Database error occurred",
+                "message",ex.getMostSpecificCause().getMessage(),
+                "timestamp", LocalDateTime.now()
+        ));
+    }
+
+
+
+    @ExceptionHandler(MovieNotFoundException.class)
+    public ResponseEntity<?> handleMovieNullPointerErrors(MovieNotFoundException ex){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                "error","Movie not Found",
+                "message",ex.getMessage(),
+                "timestamp", LocalDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(TheaterNotFoundException.class)
+    public ResponseEntity<?> handleTheaterNullPointerErrors(TheaterNotFoundException ex){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                "error","Theater not Found",
+                "message",ex.getMessage(),
+                "timestamp", LocalDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(ShowTimingNotFoundException.class)
+    public ResponseEntity<?> handleShowTimingsNullPointerErrors(ShowTimingNotFoundException ex){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                "error","Show timing not Found",
+                "message",ex.getMessage(),
+                "timestamp", LocalDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(SeatNotFoundException.class)
+    public ResponseEntity<?> handleSeatsNullPointerErrors(SeatNotFoundException ex){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                "error","Seat not Found",
+                "message",ex.getMessage(),
+                "timestamp", LocalDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(ScreenNotFoundException.class)
+    public ResponseEntity<?> handleScreensNullPointerErrors(ScreenNotFoundException ex){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                "error","Screen not Found",
+                "message",ex.getMessage(),
+                "timestamp", LocalDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(ReviewNotFoundException.class)
+    public ResponseEntity<?> handleReviewNullPointerErrors(ReviewNotFoundException ex){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                "error","Review not Found",
+                "message",ex.getMessage(),
+                "timestamp", LocalDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(SeatCategoryNotFoundException.class)
+    public ResponseEntity<?> handleSeatCategoryNullPointerErrors(SeatCategoryNotFoundException ex){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                "error","SeatCategory not Found",
+                "message",ex.getMessage(),
+                "timestamp", LocalDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(TheaterInactiveException.class)
+    public ResponseEntity<?> handleTheaterInactive(TheaterInactiveException ex) {
+        return ResponseEntity.status(HttpStatus.GONE).body(
+                Map.of(
+                        "error", "THEATER_INACTIVE",
+                        "message", ex.getMessage(),
+                        "timestamp", LocalDateTime.now()
+                )
+        );
+    }
+
+    @ExceptionHandler(MovieInactiveException.class)
+    public ResponseEntity<?> handleMovieInactive(MovieInactiveException ex) {
+        return ResponseEntity.status(HttpStatus.GONE).body(
+                Map.of(
+                        "error", "MOVIE_INACTIVE",
+                        "message", ex.getMessage(),
+                        "timestamp", LocalDateTime.now()
+                )
+        );
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<?> handleConflict(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                Map.of(
+                        "error", "STATE_CONFLICT",
+                        "message", ex.getMessage(),
+                        "timestamp", LocalDateTime.now()
+                )
+        );
+    }
+
+
+
+
+
+}
