@@ -26,10 +26,4 @@ public class ShowResponseDTO {
     private String meridiem;
 
 
-
-
-
-
-
-
 }
