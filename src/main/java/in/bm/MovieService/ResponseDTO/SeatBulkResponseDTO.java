@@ -13,7 +13,5 @@ public class SeatBulkResponseDTO {
     private Long seatCategoryId;
     private int totalSeatsCreated;
     private List<String> seatNumbers;
-    private boolean isWheelchair;
-    private boolean isBlockedView;
 
 }

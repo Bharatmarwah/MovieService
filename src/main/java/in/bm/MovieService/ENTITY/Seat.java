@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+
 @Entity
 @Table(name = "seats",uniqueConstraints = @UniqueConstraint(columnNames = {"screen_id","seat_number"}))
 @Getter
@@ -17,15 +18,15 @@ public class Seat {
     @Column(nullable = false)
     private String seatNumber;
 
-    @Column(nullable = false)
-    private boolean isActive = true;
+    @Enumerated(EnumType.STRING)
+    private SeatLifecycle lifeCycle = SeatLifecycle.ACTIVE;
 
-    @Column(nullable = false)
-    private boolean isWheelchair = false;
+    @Enumerated(EnumType.STRING)
+    private ViewType viewType = ViewType.NORMAL;
 
-    @Column(nullable = false)
-    private boolean isBlockedView = false;
-
+    @Enumerated(EnumType.STRING)
+    @Column(name = "feature")
+    private SeatFeature seatFeatures;
 
     @ManyToOne
     @JoinColumn(name = "seat_category_id", nullable = false)

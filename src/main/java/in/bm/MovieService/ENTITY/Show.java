@@ -56,13 +56,5 @@ public class Show {
                 .format(DateTimeFormatter.ofPattern("a")).toUpperCase(Locale.ROOT);
     }
 
-//    private void syncMeridiem(){
-//        int hour = this.showTime.getHour();
-//        if (hour<12){
-//            this.meridiem = "AM";
-//        } else if (hour>=12) {
-//            this.meridiem = "PM";
-//        }
-//    }
 
 }

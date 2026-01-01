@@ -1,5 +1,6 @@
 package in.bm.MovieService.RequestDTO;
 
+
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -22,9 +23,6 @@ public class SeatRequestDTO {
 
     @NotNull
     private Long seatCategoryId;
-    
-    private boolean isWheelchair;
 
-    private boolean isBlockedView;
 
 }
