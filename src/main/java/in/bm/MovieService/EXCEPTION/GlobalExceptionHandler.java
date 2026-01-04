@@ -42,8 +42,8 @@ public class GlobalExceptionHandler {
         ));
     }
 
-    @ExceptionHandler(ShowTimingNotFoundException.class)
-    public ResponseEntity<?> handleShowTimingsNullPointerErrors(ShowTimingNotFoundException ex){
+    @ExceptionHandler(ShowNotFoundException.class)
+    public ResponseEntity<?> handleShowTimingsNullPointerErrors(ShowNotFoundException ex){
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
                 "error","Show timing not Found",
                 "message",ex.getMessage(),
@@ -121,6 +121,28 @@ public class GlobalExceptionHandler {
     }
 
 
+    @ExceptionHandler(InvalidSeatException.class)
+    public ResponseEntity<?> handleInvalidSeat(InvalidSeatException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                Map.of(
+                        "error", "INVALID_SEAT",
+                        "message", ex.getMessage(),
+                        "timestamp", LocalDateTime.now()
+                )
+        );
+    }
+
+
+    @ExceptionHandler(SeatUnavailableException.class)
+    public ResponseEntity<?> handleUnavailableSeat(SeatUnavailableException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                Map.of(
+                        "error", "SEAT_UNAVAILABLE",
+                        "message", ex.getMessage(),
+                        "timestamp", LocalDateTime.now()
+                )
+        );
+    }
 
 
 

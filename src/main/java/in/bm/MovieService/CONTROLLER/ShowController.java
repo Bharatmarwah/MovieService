@@ -1,7 +1,9 @@
 package in.bm.MovieService.CONTROLLER;
 
 
+import in.bm.MovieService.RequestDTO.BookingRequestDTO;
 import in.bm.MovieService.RequestDTO.ShowRequestDTO;
+import in.bm.MovieService.ResponseDTO.BookingResponseDTO;
 import in.bm.MovieService.ResponseDTO.ShowResponseDTO;
 import in.bm.MovieService.SERVICE.ShowService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,13 @@ public class ShowController{
             (@Valid @RequestBody ShowRequestDTO dto){
         return ResponseEntity.status(HttpStatus.CREATED).body(showService.addShow(dto));
     }
+
+    // webClient api
+    @PostMapping("/booking")
+    public ResponseEntity<BookingResponseDTO> previewBooking(@Valid @RequestBody BookingRequestDTO requestDTO){
+        return ResponseEntity.status(HttpStatus.OK).body(showService.previewBooking(requestDTO));
+    }
+
 
 
 }
