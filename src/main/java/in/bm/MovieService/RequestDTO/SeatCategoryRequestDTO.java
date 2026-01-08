@@ -1,9 +1,9 @@
 package in.bm.MovieService.RequestDTO;
 
 import in.bm.MovieService.ENTITY.SeatType;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
 
 @Data
 public class SeatCategoryRequestDTO {

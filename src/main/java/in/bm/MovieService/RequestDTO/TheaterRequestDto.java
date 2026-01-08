@@ -1,11 +1,12 @@
 package in.bm.MovieService.RequestDTO;
 
 import in.bm.MovieService.ENTITY.TheaterStatus;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+
 import java.util.List;
 
 @Data
@@ -41,7 +42,7 @@ public class TheaterRequestDto {
     @NotBlank
     private String area;
 
-    @NotNull
+
     private TheaterStatus status;
 
     @NotEmpty

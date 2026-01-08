@@ -14,13 +14,14 @@ import in.bm.MovieService.RequestDTO.TheaterReviewRequestDTO;
 import in.bm.MovieService.ResponseDTO.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.Valid;
 import java.time.Instant;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -257,7 +258,7 @@ public class TheaterService {
                 .build();
     }
 
-    public TheaterReviewResponseDTO editReview(long reviewId, @Valid TheaterReviewRequestDTO dto) {
+    public TheaterReviewResponseDTO editReview(long reviewId, TheaterReviewRequestDTO dto) {
 
         log.info("Edit review request | reviewId={}", reviewId);
 
@@ -405,4 +406,42 @@ public class TheaterService {
                 .hasPrevious(theaterPage.hasPrevious())
                 .build();
     }
+
+    public TheaterFilterPageResponseDTO searchFilter(
+            String movieCode,
+            String city,
+            LocalTime time,
+            Double seatPrice,
+            int page,
+            int size
+    ) {
+        PageRequest pageRequest =
+                PageRequest.of(page, size);
+
+        Page<Theater> theaterPage =
+                theaterRepo.filter(movieCode, city, time, seatPrice,
+                        TheaterStatus.ACTIVE, pageRequest);
+
+        List<TheaterResponseDTO> theaters = theaterPage.getContent()
+                .stream()
+                .map(theater -> TheaterResponseDTO.builder()
+                        .branchName(theater.getBranchName())
+                        .brand(theater.getBrand())
+                        .theaterCode(theater.getTheatreCode())
+                        .city(theater.getCity())
+                        .avgRating(theater.getAvgRating())
+                        .allowsCancellation(theater.isAllowsCancellation())
+                        .build())
+                .toList();
+
+        return TheaterFilterPageResponseDTO.builder()
+                .theaters(theaters)
+                .hasNext(theaterPage.hasNext())
+                .hasPrevious(theaterPage.hasPrevious())
+                .page(theaterPage.getNumber())
+                .totalElements(theaterPage.getTotalElements())
+                .totalPages(theaterPage.getTotalPages())
+                .build();
+    }
+
 }

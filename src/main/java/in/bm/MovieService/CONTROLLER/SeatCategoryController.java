@@ -3,6 +3,7 @@ package in.bm.MovieService.CONTROLLER;
 import in.bm.MovieService.RequestDTO.SeatCategoryRequestDTO;
 import in.bm.MovieService.ResponseDTO.SeatCategoryResponseDTO;
 import in.bm.MovieService.SERVICE.SeatCategoryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/seat-category")

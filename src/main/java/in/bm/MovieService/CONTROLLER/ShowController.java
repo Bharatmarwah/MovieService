@@ -6,12 +6,12 @@ import in.bm.MovieService.RequestDTO.ShowRequestDTO;
 import in.bm.MovieService.ResponseDTO.BookingResponseDTO;
 import in.bm.MovieService.ResponseDTO.ShowResponseDTO;
 import in.bm.MovieService.SERVICE.ShowService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/shows")

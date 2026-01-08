@@ -5,12 +5,16 @@ import in.bm.MovieService.RequestDTO.TheaterRequestDto;
 import in.bm.MovieService.RequestDTO.TheaterReviewRequestDTO;
 import in.bm.MovieService.ResponseDTO.*;
 import in.bm.MovieService.SERVICE.TheaterService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+
+import java.math.BigDecimal;
+import java.time.LocalTime;
 import java.util.List;
 
 
@@ -120,4 +124,26 @@ public class TheaterController {
         return ResponseEntity.ok(
                 theaterService.getTheaterByStatus(status, page, size));
     }
+
+    @GetMapping("/filters")
+    public ResponseEntity<TheaterFilterPageResponseDTO> filters(
+            @RequestParam String movieCode,
+            @RequestParam(required = false) String city,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(pattern = "HH:mm")
+            LocalTime time,
+
+            @RequestParam(required = false) Double seatPrice,
+
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(theaterService.searchFilter(
+                        movieCode, city, time, seatPrice, page, size
+                ));
+    }
+
 }

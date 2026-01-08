@@ -1,6 +1,5 @@
 package in.bm.MovieService.ResponseDTO;
 
-import in.bm.MovieService.ENTITY.Seat;
 import lombok.Builder;
 import lombok.Getter;
 

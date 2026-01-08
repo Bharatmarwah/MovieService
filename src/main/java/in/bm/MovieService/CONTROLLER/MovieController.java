@@ -4,13 +4,11 @@ import in.bm.MovieService.RequestDTO.MovieRequestDTO;
 import in.bm.MovieService.RequestDTO.MovieReviewRequestDTO;
 import in.bm.MovieService.ResponseDTO.*;
 import in.bm.MovieService.SERVICE.MovieService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-
 
 @RestController
 @RequestMapping("/movies")
@@ -22,8 +20,8 @@ public class MovieController {
     //movies?page=0&size=10
     @GetMapping
     public ResponseEntity<MoviePageResponseDTO> getMovies
-    (@RequestParam int page,
-     @RequestParam int size) {
+    (@RequestParam(defaultValue = "0") int page,
+     @RequestParam(defaultValue = "10") int size) {
         MoviePageResponseDTO response = movieService.getMovies(page, size);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -51,8 +49,6 @@ public class MovieController {
         MoviePageResponseDTO response = movieService.searchMovie(q, page, size);
         return ResponseEntity.ok(response);
     }
-
-
     //movies/{movieCode}
     @GetMapping("/{movieCode}")
     public ResponseEntity<MovieResponseDTO> getMovieId(@PathVariable String movieCode) {
@@ -82,6 +78,18 @@ public class MovieController {
         return ResponseEntity.status(HttpStatus.OK).body(movieService.activate(movieCode));
     }
 
+
+
+
     //filter
 
 }
+//movies
+//{movieCode}/details
+//movies/search
+//movies/{moviesCode}
+
+
+
+// showtime will list out the theaters near using latitude and longitude
+// done by show time -> screen and then theaters

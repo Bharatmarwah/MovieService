@@ -5,20 +5,17 @@ import in.bm.MovieService.EXCEPTION.*;
 import in.bm.MovieService.REPO.MovieRepo;
 import in.bm.MovieService.REPO.ScreenRepo;
 import in.bm.MovieService.REPO.ShowRepo;
-import in.bm.MovieService.RequestDTO.BookingRequestDTO;
 import in.bm.MovieService.RequestDTO.ShowRequestDTO;
 import in.bm.MovieService.ResponseDTO.BookingResponseDTO;
 import in.bm.MovieService.ResponseDTO.ShowResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
-import javax.validation.Valid;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -30,7 +27,7 @@ public class ShowService {
     private final ScreenRepo screenRepo;
     private final MovieRepo movieRepo;
 
-    public ShowResponseDTO addShow(@Valid ShowRequestDTO dto) {
+    public ShowResponseDTO addShow( ShowRequestDTO dto) {
 
         log.info(
                 "Add show request received | movieCode={} screenId={} showDate={} showTime={}",
@@ -103,7 +100,7 @@ public class ShowService {
                 .build();
     }
 
-    public BookingResponseDTO previewBooking(in.bm.MovieService.RequestDTO.@Valid BookingRequestDTO requestDTO) {
+    public BookingResponseDTO previewBooking(in.bm.MovieService.RequestDTO.BookingRequestDTO requestDTO) {
         Show show = showRepo.findById(requestDTO.getShowId())
                 .orElseThrow(()
                         -> new ShowNotFoundException("show is not found"));
