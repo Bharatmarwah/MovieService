@@ -8,9 +8,11 @@ import in.bm.MovieService.REPO.ShowRepo;
 import in.bm.MovieService.RequestDTO.ShowRequestDTO;
 import in.bm.MovieService.ResponseDTO.BookingResponseDTO;
 import in.bm.MovieService.ResponseDTO.ShowResponseDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.HashSet;
@@ -27,7 +29,8 @@ public class ShowService {
     private final ScreenRepo screenRepo;
     private final MovieRepo movieRepo;
 
-    public ShowResponseDTO addShow( ShowRequestDTO dto) {
+    @Transactional
+    public ShowResponseDTO addShow(ShowRequestDTO dto) {
 
         log.info(
                 "Add show request received | movieCode={} screenId={} showDate={} showTime={}",
@@ -100,6 +103,7 @@ public class ShowService {
                 .build();
     }
 
+    @Transactional
     public BookingResponseDTO previewBooking(in.bm.MovieService.RequestDTO.BookingRequestDTO requestDTO) {
         Show show = showRepo.findById(requestDTO.getShowId())
                 .orElseThrow(()
@@ -110,10 +114,10 @@ public class ShowService {
         List<Seat> matchedSeats = show.getScreen()
                 .getSeats()
                 .stream()
-                .filter(seat->requestSeats.contains(seat.getSeatNumber()))
+                .filter(seat -> requestSeats.contains(seat.getSeatNumber()))
                 .toList();
 
-        if (matchedSeats.size()!=requestSeats.size()){
+        if (matchedSeats.size() != requestSeats.size()) {
             throw new InvalidSeatException("Invalid seat number(s)");
         }
 
@@ -126,7 +130,7 @@ public class ShowService {
                 .mapToDouble(seat -> seat.getSeatCategory().getPrice())
                 .sum();
 
-       List<String> seatNumbers = matchedSeats.stream().map(Seat::getSeatNumber).toList();
+        List<String> seatNumbers = matchedSeats.stream().map(Seat::getSeatNumber).toList();
 
         return BookingResponseDTO
                 .builder()
@@ -135,5 +139,54 @@ public class ShowService {
                 .theaterCode(show.getScreen().getTheater().getTheatreCode())
                 .seatNumbers(seatNumbers).baseAmount(baseAmount).build();
 
+    }
+
+    @Transactional
+    public ShowResponseDTO updateShow(@Valid ShowRequestDTO requestDTO, Long showId) {
+        Show show = showRepo.findById(showId)
+                .orElseThrow(() ->
+                        new ShowNotFoundException("Show not found"));
+
+        Movie movie = movieRepo.
+                findById(requestDTO.getMovieCode()).
+                orElseThrow(() ->
+                        new MovieNotFoundException("Movie not found"));
+
+        if (movie.getStatus()!=MovieStatus.ACTIVE){
+            throw new MovieInactiveException("Movie is not active");
+        }
+
+        Screen screen = screenRepo.
+                findById(requestDTO.getScreenId()).
+                orElseThrow(() ->
+                        new ScreenNotFoundException("Screen not found"));
+
+        show.setMovie(movie);
+        show.setScreen(screen);
+        show.setShowTime(requestDTO.getShowTime());
+        show.setShowDate(requestDTO.getShowDate());
+
+        Show updateShow = showRepo.save(show);
+
+
+        return ShowResponseDTO.builder().
+                movieCode(updateShow.getMovie().getMovieCode()).
+                meridiem(updateShow.getMeridiem()).
+                dayOfWeek(updateShow.getDayOfWeek()).
+                showDate(updateShow.getShowDate()).
+                screenId(updateShow.getScreen().getScreenId()).
+                showTime(updateShow.getShowTime()).
+                showId(updateShow.getShowId()).
+                build();
+    }
+
+    @Transactional
+    public void deleteShow(Long showId){
+       Show show = showRepo.
+               findById(showId).
+               orElseThrow(()->
+                       new ShowNotFoundException("Show not found"));
+
+       showRepo.delete(show);
     }
 }

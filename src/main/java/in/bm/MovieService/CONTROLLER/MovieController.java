@@ -80,9 +80,6 @@ public class MovieController {
 
 
 
-
-    //filter
-
 }
 //movies
 //{movieCode}/details

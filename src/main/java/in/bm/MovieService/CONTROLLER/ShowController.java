@@ -16,22 +16,32 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/shows")
 @RequiredArgsConstructor
-public class ShowController{
+public class ShowController {
 
     private final ShowService showService;
 
     @PostMapping
     public ResponseEntity<ShowResponseDTO> addShow
-            (@Valid @RequestBody ShowRequestDTO dto){
+            (@Valid @RequestBody ShowRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(showService.addShow(dto));
+    }
+
+    @PutMapping("/showId")
+    public ResponseEntity<ShowResponseDTO> updateShow(@Valid @RequestBody ShowRequestDTO requestDTO, @PathVariable Long showId) {
+        return ResponseEntity.status(HttpStatus.OK).body(showService.updateShow(requestDTO, showId));
+    }
+
+    @DeleteMapping("/showId")
+    public ResponseEntity<Void> deleteShow(@PathVariable Long showId) {
+        showService.deleteShow(showId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     // webClient api
     @PostMapping("/booking")
-    public ResponseEntity<BookingResponseDTO> previewBooking(@Valid @RequestBody BookingRequestDTO requestDTO){
+    public ResponseEntity<BookingResponseDTO> previewBooking(@Valid @RequestBody BookingRequestDTO requestDTO) {
         return ResponseEntity.status(HttpStatus.OK).body(showService.previewBooking(requestDTO));
     }
-
 
 
 }

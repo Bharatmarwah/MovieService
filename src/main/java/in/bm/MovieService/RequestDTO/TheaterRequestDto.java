@@ -42,7 +42,6 @@ public class TheaterRequestDto {
     @NotBlank
     private String area;
 
-
     private TheaterStatus status;
 
     @NotEmpty

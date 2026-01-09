@@ -7,22 +7,30 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
 @RequestMapping("/screens")
 @RequiredArgsConstructor
-public class ScreenController{
+public class ScreenController {
 
     private final ScreenService screenService;
 
     @PostMapping
-    public ResponseEntity<ScreenResponseDTO> addScreen(@Valid @RequestBody ScreenRequestDTO dto){
+    public ResponseEntity<ScreenResponseDTO> addScreen(@Valid @RequestBody ScreenRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(screenService.addScreen(dto));
+    }
+
+    @PutMapping("/{screenId}")
+    public ResponseEntity<ScreenResponseDTO> updateScreen(@Valid @RequestBody ScreenRequestDTO requestDTO, @PathVariable Long screenId) {
+        return ResponseEntity.status(HttpStatus.OK).body(screenService.updateScreen(requestDTO, screenId));
+    }
+
+    @DeleteMapping("/{screenId}")
+    public ResponseEntity<Void> deleteScreen(@PathVariable Long screenId) {
+        screenService.deleteScreen(screenId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 
