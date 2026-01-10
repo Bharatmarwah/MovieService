@@ -126,7 +126,7 @@ public class TheaterController {
 
     @GetMapping("/filters")
     public ResponseEntity<TheaterFilterPageResponseDTO> filters(
-            @RequestParam String movieCode,
+            @RequestParam(required = false) String movieCode,
             @RequestParam(required = false) String city,
 
             @RequestParam(required = false)

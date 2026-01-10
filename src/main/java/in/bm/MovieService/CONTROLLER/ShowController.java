@@ -4,6 +4,7 @@ package in.bm.MovieService.CONTROLLER;
 import in.bm.MovieService.RequestDTO.BookingRequestDTO;
 import in.bm.MovieService.RequestDTO.ShowRequestDTO;
 import in.bm.MovieService.ResponseDTO.BookingResponseDTO;
+import in.bm.MovieService.ResponseDTO.ShowPageResponseDTO;
 import in.bm.MovieService.ResponseDTO.ShowResponseDTO;
 import in.bm.MovieService.SERVICE.ShowService;
 import jakarta.validation.Valid;
@@ -26,16 +27,28 @@ public class ShowController {
         return ResponseEntity.status(HttpStatus.CREATED).body(showService.addShow(dto));
     }
 
-    @PutMapping("/showId")
+    @PutMapping("/{showId}")
     public ResponseEntity<ShowResponseDTO> updateShow(@Valid @RequestBody ShowRequestDTO requestDTO, @PathVariable Long showId) {
         return ResponseEntity.status(HttpStatus.OK).body(showService.updateShow(requestDTO, showId));
     }
 
-    @DeleteMapping("/showId")
+    @DeleteMapping("/{showId}")
     public ResponseEntity<Void> deleteShow(@PathVariable Long showId) {
         showService.deleteShow(showId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @GetMapping
+    public ResponseEntity<ShowPageResponseDTO> getAllShows(@RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(defaultValue = "10") int size){
+        return ResponseEntity.status(HttpStatus.OK).body(showService.getAllShow(page,size));
+    }
+
+    @GetMapping("/{showId}")
+    public ResponseEntity<ShowResponseDTO> getShowById(@PathVariable Long showId){
+        return ResponseEntity.status(HttpStatus.OK).body(showService.getShowById(showId));
+    }
+
 
     // webClient api
     @PostMapping("/booking")

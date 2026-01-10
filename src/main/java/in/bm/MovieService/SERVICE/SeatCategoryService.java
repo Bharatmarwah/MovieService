@@ -9,12 +9,18 @@ import in.bm.MovieService.EXCEPTION.TheaterInactiveException;
 import in.bm.MovieService.REPO.ScreenRepo;
 import in.bm.MovieService.REPO.SeatCategoryRepo;
 import in.bm.MovieService.RequestDTO.SeatCategoryRequestDTO;
+import in.bm.MovieService.ResponseDTO.SeatCategoryPageResponseDTO;
 import in.bm.MovieService.ResponseDTO.SeatCategoryResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -102,5 +108,47 @@ public class SeatCategoryService {
                         new SeatCategoryNotFoundException("Seat category not found"));
 
         seatCategoryRepo.delete(seatCategory);
+    }
+
+    public SeatCategoryResponseDTO getSeatCategoryById(Long seatCategoryId) {
+       SeatCategory seatCategory = seatCategoryRepo.
+               findById(seatCategoryId).
+               orElseThrow(()->
+                       new SeatCategoryNotFoundException("Seat category not found"));
+
+       return SeatCategoryResponseDTO
+               .builder()
+               .seatCategoryId(seatCategory.getId())
+               .screenId(seatCategory.getScreen().getScreenId())
+               .prize(seatCategory.getPrice())
+               .seatType(seatCategory.getSeatType())
+               .build();
+    }
+
+    public SeatCategoryPageResponseDTO getAllSeatCategories(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page,size);
+        Page<SeatCategory> seatCategoryPage = seatCategoryRepo.findAll(pageRequest);
+
+        List<SeatCategoryResponseDTO> seatCategories = seatCategoryPage.getContent().stream().map(seatCategory -> SeatCategoryResponseDTO
+                .builder()
+                .seatCategoryId(seatCategory.getId())
+                .screenId(seatCategory.getScreen().getScreenId())
+                .prize(seatCategory.getPrice())
+                .seatType(seatCategory.getSeatType())
+                .build()).toList();
+
+
+        return SeatCategoryPageResponseDTO.
+                builder().
+                seatCategories(seatCategories).
+                hasNext(seatCategoryPage.hasNext()).
+                hasPrevious(seatCategoryPage.hasPrevious()).
+                page(seatCategoryPage.getTotalPages()).
+                size(seatCategoryPage.getSize()).
+                totalElements(seatCategoryPage.getTotalElements()).
+                totalPages(seatCategoryPage.getTotalPages())
+                .build();
+
+
     }
 }

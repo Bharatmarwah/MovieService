@@ -1,7 +1,7 @@
 package in.bm.MovieService.CONTROLLER;
 
-import in.bm.MovieService.ENTITY.SeatCategory;
 import in.bm.MovieService.RequestDTO.SeatCategoryRequestDTO;
+import in.bm.MovieService.ResponseDTO.SeatCategoryPageResponseDTO;
 import in.bm.MovieService.ResponseDTO.SeatCategoryResponseDTO;
 import in.bm.MovieService.SERVICE.SeatCategoryService;
 import jakarta.validation.Valid;
@@ -24,13 +24,25 @@ public class SeatCategoryController {
     }
 
     @PutMapping("/{seatCategoryId}")
-    public ResponseEntity<SeatCategoryResponseDTO> updateSeatCategory(@Valid @RequestBody SeatCategoryRequestDTO dto, @PathVariable Long seatCategory) {
-        return ResponseEntity.status(HttpStatus.OK).body(seatCategoryService.updateSeatCategory(dto,seatCategory));
+    public ResponseEntity<SeatCategoryResponseDTO> updateSeatCategory(@Valid @RequestBody SeatCategoryRequestDTO dto, @PathVariable Long seatCategoryId) {
+        return ResponseEntity.status(HttpStatus.OK).body(seatCategoryService.updateSeatCategory(dto,seatCategoryId));
     }
 
     @DeleteMapping("/{seatCategoryId}")
     public ResponseEntity<Void> deleteSeatCategory(@PathVariable Long seatCategoryId){
         seatCategoryService.deleteSeatCategory(seatCategoryId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @GetMapping("/{seatCategoryId}")
+    public ResponseEntity<SeatCategoryResponseDTO> getSeatCategoryById(@PathVariable Long seatCategoryId){
+        return ResponseEntity.status(HttpStatus.OK).body(seatCategoryService.getSeatCategoryById(seatCategoryId));
+    }
+
+    @GetMapping
+    public ResponseEntity<SeatCategoryPageResponseDTO> getAllSeatCategories(@RequestParam(defaultValue = "0") int page,
+                                                                            @RequestParam(defaultValue = "10") int size){
+        return ResponseEntity.status(HttpStatus.OK).body(seatCategoryService.getAllSeatCategories(page,size));
+
     }
 }

@@ -2,12 +2,15 @@ package in.bm.MovieService.SERVICE;
 
 
 import in.bm.MovieService.ENTITY.Screen;
+import in.bm.MovieService.ENTITY.SeatCategory;
 import in.bm.MovieService.ENTITY.Theater;
 import in.bm.MovieService.ENTITY.TheaterStatus;
 import in.bm.MovieService.EXCEPTION.ScreenNotFoundException;
 import in.bm.MovieService.EXCEPTION.TheaterInactiveException;
 import in.bm.MovieService.EXCEPTION.TheaterNotFoundException;
 import in.bm.MovieService.REPO.ScreenRepo;
+import in.bm.MovieService.REPO.SeatCategoryRepo;
+import in.bm.MovieService.REPO.SeatRepo;
 import in.bm.MovieService.REPO.TheaterRepo;
 import in.bm.MovieService.RequestDTO.ScreenRequestDTO;
 import in.bm.MovieService.ResponseDTO.ScreenResponseDTO;
@@ -24,6 +27,8 @@ public class ScreenService {
 
     private final ScreenRepo screenRepo;
     private final TheaterRepo theaterRepo;
+    private final SeatCategoryRepo seatCategoryRepo;
+    private final SeatRepo seatRepo;
 
 
     public ScreenResponseDTO addScreen(ScreenRequestDTO dto) {
@@ -76,14 +81,5 @@ public class ScreenService {
                 .theaterCode(updatedScreen.getTheater().getTheatreCode())
                 .screenName(updatedScreen.getScreenName())
                 .build();
-    }
-
-    @Transactional
-    public void deleteScreen(Long screenId) {
-        Screen screen = screenRepo
-                .findById(screenId)
-                .orElseThrow(() ->
-                        new ScreenNotFoundException("Screen not found"));
-        screenRepo.delete(screen);
     }
 }

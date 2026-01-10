@@ -7,10 +7,14 @@ import in.bm.MovieService.REPO.ScreenRepo;
 import in.bm.MovieService.REPO.ShowRepo;
 import in.bm.MovieService.RequestDTO.ShowRequestDTO;
 import in.bm.MovieService.ResponseDTO.BookingResponseDTO;
+import in.bm.MovieService.ResponseDTO.ShowPageResponseDTO;
 import in.bm.MovieService.ResponseDTO.ShowResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -152,7 +156,7 @@ public class ShowService {
                 orElseThrow(() ->
                         new MovieNotFoundException("Movie not found"));
 
-        if (movie.getStatus()!=MovieStatus.ACTIVE){
+        if (movie.getStatus() != MovieStatus.ACTIVE) {
             throw new MovieInactiveException("Movie is not active");
         }
 
@@ -181,12 +185,58 @@ public class ShowService {
     }
 
     @Transactional
-    public void deleteShow(Long showId){
-       Show show = showRepo.
-               findById(showId).
-               orElseThrow(()->
-                       new ShowNotFoundException("Show not found"));
+    public void deleteShow(Long showId) {
+        Show show = showRepo.
+                findById(showId).
+                orElseThrow(() ->
+                        new ShowNotFoundException("Show not found"));
 
-       showRepo.delete(show);
+        showRepo.delete(show);
+    }
+
+    public ShowPageResponseDTO getAllShow(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<Show> showPage = showRepo.findALlShowWithActiveMovies(pageRequest, MovieStatus.ACTIVE);
+
+        List<ShowResponseDTO> shows = showPage.getContent().stream().map(show -> ShowResponseDTO.builder().
+                        showId(show.getShowId()).
+                        screenId(show.getScreen().getScreenId()).
+                        showTime(show.getShowTime()).
+                        showDate(show.getShowDate()).
+                        dayOfWeek(show.getDayOfWeek()).
+                        meridiem(show.getMeridiem()).
+                        movieCode(show.getMovie().getMovieCode())
+                        .build())
+                .toList();
+
+        return ShowPageResponseDTO.
+                builder().
+                showResponses(shows).
+                hasNext(showPage.hasNext()).
+                hasPrevious(showPage.hasPrevious()).
+                page(showPage.getTotalPages()).
+                size(showPage.getSize()).
+                totalElements(showPage.getTotalElements()).
+                totalPages(showPage.getTotalPages())
+                .build();
+    }
+
+    public ShowResponseDTO getShowById(Long showId) {
+        Show show = showRepo.
+                findById(showId).
+                orElseThrow(() ->
+                        new ShowNotFoundException("Show not found"));
+        if (show.getMovie().getStatus() != MovieStatus.ACTIVE) {
+            throw new MovieInactiveException("Movie is no longer active");
+        }
+        return ShowResponseDTO.builder()
+                .showId(show.getShowId()).
+                screenId(show.getScreen().getScreenId()).
+                showTime(show.getShowTime()).
+                showDate(show.getShowDate()).
+                dayOfWeek(show.getDayOfWeek()).
+                meridiem(show.getMeridiem()).
+                movieCode(show.getMovie().getMovieCode()).
+                build();
     }
 }
