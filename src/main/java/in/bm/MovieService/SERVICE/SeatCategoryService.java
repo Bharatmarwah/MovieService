@@ -14,7 +14,6 @@ import in.bm.MovieService.ResponseDTO.SeatCategoryResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -30,53 +29,30 @@ public class SeatCategoryService {
     private final SeatCategoryRepo seatCategoryRepo;
     private final ScreenRepo screenRepo;
 
-    @Transactional
-    public SeatCategoryResponseDTO updateSeatCategory(@Valid SeatCategoryRequestDTO dto, Long seatCategoryId) {
-
-        SeatCategory seatCategory = seatCategoryRepo
-                .findById(seatCategoryId)
-                .orElseThrow(() ->
-                        new SeatCategoryNotFoundException("Seat category not found"));
-
-        Screen screen = screenRepo
-                .findById(dto.getScreenId())
-                .orElseThrow(() ->
-                        new ScreenNotFoundException("Screen not found"));
-
-        seatCategory.setScreen(screen);
-        seatCategory.setPrice(dto.getPrize());
-        seatCategory.setSeatType(dto.getSeatType());
-
-        SeatCategory updatedSeatCategory = seatCategoryRepo.save(seatCategory);
-
-        return SeatCategoryResponseDTO
-                .builder()
-                .seatCategoryId(updatedSeatCategory.getId())
-                .screenId(updatedSeatCategory.getScreen().getScreenId())
-                .seatType(updatedSeatCategory.getSeatType())
-                .prize(updatedSeatCategory.getPrice())
-                .build();
-
-    }
 
     @Transactional
-    public SeatCategoryResponseDTO addSeatCategory(SeatCategoryRequestDTO dto) {
+    public SeatCategoryResponseDTO addSeatCategory(@Valid SeatCategoryRequestDTO dto) {
 
-        log.info("Add seat category request | seatType={} price={} screenId={}",
-                dto.getSeatType(), dto.getPrize(), dto.getScreenId());
+        log.info(
+                "Add seat category request | seatType={} price={} screenId={}",
+                dto.getSeatType(),
+                dto.getPrize(),
+                dto.getScreenId()
+        );
 
         Screen screen = screenRepo.findById(dto.getScreenId())
                 .orElseThrow(() -> {
-                    log.warn("Add seat category failed | screen not found screenId={}",
-                            dto.getScreenId());
+                    log.warn("Add seat category failed | screen not found screenId={}", dto.getScreenId());
                     return new ScreenNotFoundException("Screen not found");
                 });
 
         if (screen.getTheater().getStatus() != TheaterStatus.ACTIVE) {
-            log.warn("Add seat category rejected | theater inactive theaterCode={} status={}",
+            log.warn(
+                    "Add seat category blocked | theater inactive theaterCode={} status={}",
                     screen.getTheater().getTheatreCode(),
-                    screen.getTheater().getStatus());
-            throw new TheaterInactiveException("Theater is no longer active");
+                    screen.getTheater().getStatus()
+            );
+            throw new TheaterInactiveException("Theater is not active");
         }
 
         SeatCategory seatCategory = new SeatCategory();
@@ -84,71 +60,151 @@ public class SeatCategoryService {
         seatCategory.setPrice(dto.getPrize());
         seatCategory.setScreen(screen);
 
-        SeatCategory savedSeatCategory = seatCategoryRepo.save(seatCategory);
+        SeatCategory saved = seatCategoryRepo.save(seatCategory);
 
-        log.info("Seat category added successfully | seatCategoryId={} screenId={} seatType={}",
-                savedSeatCategory.getId(),
+        log.info(
+                "Seat category created | seatCategoryId={} screenId={} seatType={}",
+                saved.getId(),
                 screen.getScreenId(),
-                savedSeatCategory.getSeatType());
+                saved.getSeatType()
+        );
 
         return SeatCategoryResponseDTO.builder()
-                .seatCategoryId(savedSeatCategory.getId())
-                .seatType(savedSeatCategory.getSeatType())
-                .prize(savedSeatCategory.getPrice())
-                .screenId(savedSeatCategory.getScreen().getScreenId())
+                .seatCategoryId(saved.getId())
+                .screenId(saved.getScreen().getScreenId())
+                .seatType(saved.getSeatType())
+                .prize(saved.getPrice())
+                .build();
+    }
+
+    @Transactional
+    public SeatCategoryResponseDTO updateSeatCategory(
+            @Valid SeatCategoryRequestDTO dto,
+            Long seatCategoryId
+    ) {
+
+        log.info("Update seat category request | seatCategoryId={}", seatCategoryId);
+
+        SeatCategory seatCategory = seatCategoryRepo.findById(seatCategoryId)
+                .orElseThrow(() -> {
+                    log.warn("Update failed | seat category not found seatCategoryId={}", seatCategoryId);
+                    return new SeatCategoryNotFoundException("Seat category not found");
+                });
+
+        Screen screen = screenRepo.findById(dto.getScreenId())
+                .orElseThrow(() -> {
+                    log.warn("Update failed | screen not found screenId={}", dto.getScreenId());
+                    return new ScreenNotFoundException("Screen not found");
+                });
+
+        if (screen.getTheater().getStatus() != TheaterStatus.ACTIVE) {
+            log.warn(
+                    "Update blocked | theater inactive theaterCode={} status={}",
+                    screen.getTheater().getTheatreCode(),
+                    screen.getTheater().getStatus()
+            );
+            throw new TheaterInactiveException("Theater is not active");
+        }
+
+        seatCategory.setScreen(screen);
+        seatCategory.setPrice(dto.getPrize());
+        seatCategory.setSeatType(dto.getSeatType());
+
+        SeatCategory updated = seatCategoryRepo.save(seatCategory);
+
+        log.info(
+                "Seat category updated | seatCategoryId={} screenId={} seatType={}",
+                updated.getId(),
+                updated.getScreen().getScreenId(),
+                updated.getSeatType()
+        );
+
+        return SeatCategoryResponseDTO.builder()
+                .seatCategoryId(updated.getId())
+                .screenId(updated.getScreen().getScreenId())
+                .seatType(updated.getSeatType())
+                .prize(updated.getPrice())
                 .build();
     }
 
 
     @Transactional
     public void deleteSeatCategory(Long seatCategoryId) {
-        SeatCategory seatCategory = seatCategoryRepo
-                .findById(seatCategoryId)
-                .orElseThrow(()->
-                        new SeatCategoryNotFoundException("Seat category not found"));
+
+        log.info("Delete seat category request | seatCategoryId={}", seatCategoryId);
+
+        SeatCategory seatCategory = seatCategoryRepo.findById(seatCategoryId)
+                .orElseThrow(() -> {
+                    log.warn("Delete failed | seat category not found seatCategoryId={}", seatCategoryId);
+                    return new SeatCategoryNotFoundException("Seat category not found");
+                });
 
         seatCategoryRepo.delete(seatCategory);
+
+        log.info("Seat category deleted | seatCategoryId={}", seatCategoryId);
     }
 
+
+    @Transactional(readOnly = true)
     public SeatCategoryResponseDTO getSeatCategoryById(Long seatCategoryId) {
-       SeatCategory seatCategory = seatCategoryRepo.
-               findById(seatCategoryId).
-               orElseThrow(()->
-                       new SeatCategoryNotFoundException("Seat category not found"));
 
-       return SeatCategoryResponseDTO
-               .builder()
-               .seatCategoryId(seatCategory.getId())
-               .screenId(seatCategory.getScreen().getScreenId())
-               .prize(seatCategory.getPrice())
-               .seatType(seatCategory.getSeatType())
-               .build();
-    }
+        log.info("Fetch seat category by id | seatCategoryId={}", seatCategoryId);
 
-    public SeatCategoryPageResponseDTO getAllSeatCategories(int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page,size);
-        Page<SeatCategory> seatCategoryPage = seatCategoryRepo.findAll(pageRequest);
+        SeatCategory seatCategory = seatCategoryRepo.findById(seatCategoryId)
+                .orElseThrow(() -> {
+                    log.warn("Fetch failed | seat category not found seatCategoryId={}", seatCategoryId);
+                    return new SeatCategoryNotFoundException("Seat category not found");
+                });
 
-        List<SeatCategoryResponseDTO> seatCategories = seatCategoryPage.getContent().stream().map(seatCategory -> SeatCategoryResponseDTO
-                .builder()
+        log.info(
+                "Seat category fetched | seatCategoryId={} screenId={} seatType={}",
+                seatCategory.getId(),
+                seatCategory.getScreen().getScreenId(),
+                seatCategory.getSeatType()
+        );
+
+        return SeatCategoryResponseDTO.builder()
                 .seatCategoryId(seatCategory.getId())
                 .screenId(seatCategory.getScreen().getScreenId())
-                .prize(seatCategory.getPrice())
                 .seatType(seatCategory.getSeatType())
-                .build()).toList();
-
-
-        return SeatCategoryPageResponseDTO.
-                builder().
-                seatCategories(seatCategories).
-                hasNext(seatCategoryPage.hasNext()).
-                hasPrevious(seatCategoryPage.hasPrevious()).
-                page(seatCategoryPage.getTotalPages()).
-                size(seatCategoryPage.getSize()).
-                totalElements(seatCategoryPage.getTotalElements()).
-                totalPages(seatCategoryPage.getTotalPages())
+                .prize(seatCategory.getPrice())
                 .build();
+    }
 
 
+    @Transactional(readOnly = true)
+    public SeatCategoryPageResponseDTO getAllSeatCategories(int page, int size) {
+
+        log.info("Fetch all seat categories | page={} size={}", page, size);
+
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<SeatCategory> pageResult = seatCategoryRepo.findAll(pageRequest);
+
+        List<SeatCategoryResponseDTO> categories = pageResult.getContent()
+                .stream()
+                .map(sc -> SeatCategoryResponseDTO.builder()
+                        .seatCategoryId(sc.getId())
+                        .screenId(sc.getScreen().getScreenId())
+                        .seatType(sc.getSeatType())
+                        .prize(sc.getPrice())
+                        .build())
+                .toList();
+
+        log.info(
+                "Seat categories fetched | page={} size={} totalElements={}",
+                pageResult.getNumber(),
+                pageResult.getSize(),
+                pageResult.getTotalElements()
+        );
+
+        return SeatCategoryPageResponseDTO.builder()
+                .seatCategories(categories)
+                .page(pageResult.getNumber())
+                .size(pageResult.getSize())
+                .totalElements(pageResult.getTotalElements())
+                .totalPages(pageResult.getTotalPages())
+                .hasNext(pageResult.hasNext())
+                .hasPrevious(pageResult.hasPrevious())
+                .build();
     }
 }

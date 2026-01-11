@@ -5,9 +5,7 @@ import in.bm.MovieService.EXCEPTION.*;
 import in.bm.MovieService.REPO.ScreenRepo;
 import in.bm.MovieService.REPO.SeatCategoryRepo;
 import in.bm.MovieService.REPO.SeatRepo;
-import in.bm.MovieService.RequestDTO.SeatCategoriesRequestDTO;
-import in.bm.MovieService.RequestDTO.AddSeatRequestDTO;
-import in.bm.MovieService.RequestDTO.SeatRequestDTO;
+import in.bm.MovieService.RequestDTO.*;
 import in.bm.MovieService.ResponseDTO.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,11 +13,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +28,9 @@ public class SeatService {
     private final ScreenRepo screenRepo;
     private final SeatCategoryRepo seatCategoryRepo;
 
-    public SeatBulkResponseDTO addSeats(AddSeatRequestDTO dto) {
+
+    @Transactional
+    public SeatBulkResponseDTO addSeats(@org.jetbrains.annotations.NotNull AddSeatRequestDTO dto) {
 
         log.info(
                 "Add seats request | screenId={} seatCategoryId={} rows {}-{} seatsPerRow={}",
@@ -42,24 +42,21 @@ public class SeatService {
         );
 
         Screen screen = screenRepo.findById(dto.getScreenId())
-                .orElseThrow(() ->
-                        new ScreenNotFoundException("Screen not found"));
+                .orElseThrow(() -> new ScreenNotFoundException("Screen not found"));
 
         SeatCategory seatCategory = seatCategoryRepo.findById(dto.getSeatCategoryId())
-                .orElseThrow(() ->
-                        new SeatCategoryNotFoundException("Seat category not found"));
+                .orElseThrow(() -> new SeatCategoryNotFoundException("Seat category not found"));
 
-        List<Seat> seats = new ArrayList<>();
-        List<String> seatNumbers = new ArrayList<>();
-
-        if (dto.getRowStart().toUpperCase(Locale.ROOT).charAt(0) > dto.getRowEnd().toUpperCase(Locale.ROOT).charAt(0)) {
+        if (dto.getRowStart().toUpperCase(Locale.ROOT).charAt(0)
+                > dto.getRowEnd().toUpperCase(Locale.ROOT).charAt(0)) {
             throw new IllegalStateException("rowStart must be <= rowEnd");
         }
 
         char startRow = dto.getRowStart().toUpperCase().charAt(0);
         char endRow = dto.getRowEnd().toUpperCase().charAt(0);
 
-        // ASCII numbers
+        List<Seat> seats = new ArrayList<>();
+        List<String> seatNumbers = new ArrayList<>();
 
         for (char row = startRow; row <= endRow; row++) {
             for (int i = 1; i <= dto.getSeatsPerRow(); i++) {
@@ -79,183 +76,256 @@ public class SeatService {
             }
         }
 
-        List<Seat> saved = seatRepo.saveAll(seats);
+        List<Seat> savedSeats = seatRepo.saveAll(seats);
 
         log.info(
                 "Seats created successfully | screenId={} totalSeats={}",
                 screen.getScreenId(),
-                seats.size()
+                savedSeats.size()
         );
 
         return SeatBulkResponseDTO.builder()
                 .screenId(screen.getScreenId())
                 .seatCategoryId(seatCategory.getId())
-                .totalSeatsCreated(seats.size())
+                .totalSeatsCreated(savedSeats.size())
                 .seatNumbers(seatNumbers)
-                .seatFeature(saved.stream().map(Seat::getSeatFeatures).toList())
-                .seatLifecycle(saved.stream().map(Seat::getLifeCycle).toList())
+                .seatFeature(savedSeats.stream().map(Seat::getSeatFeatures).toList())
+                .seatLifecycle(savedSeats.stream().map(Seat::getLifeCycle).toList())
                 .build();
     }
 
-    public SeatCategoriesResponseDTO updateSeatCategories(Long seatsId, @Valid SeatCategoriesRequestDTO requestDTO) {
-        Seat seat = seatRepo.
-                findById(seatsId).
-                orElseThrow(() ->
-                        new SeatNotFoundException("Seat not found"));
+    @Transactional
+    public SeatCategoriesResponseDTO updateSeatCategories(Long seatId,
+                                                          @Valid SeatCategoriesRequestDTO dto) {
 
+        log.info("Update seat categories request | seatId={}", seatId);
 
-        seat.setViewType(requestDTO.getViewType());
-        seat.setSeatFeatures(requestDTO.getSeatFeature());
+        Seat seat = seatRepo.findById(seatId)
+                .orElseThrow(() -> new SeatNotFoundException("Seat not found"));
+
+        seat.setViewType(dto.getViewType());
+        seat.setSeatFeatures(dto.getSeatFeature());
 
         Seat updatedSeat = seatRepo.save(seat);
 
-        return SeatCategoriesResponseDTO.
-                builder().
-                seatId(updatedSeat.getSeatId()).
-                seatFeature(updatedSeat.getSeatFeatures()).
-                seatNumber(updatedSeat.getSeatNumber()).
-                viewType(updatedSeat.getViewType()).
-                build();
+        log.info(
+                "Seat categories updated | seatId={} feature={} viewType={}",
+                updatedSeat.getSeatId(),
+                updatedSeat.getSeatFeatures(),
+                updatedSeat.getViewType()
+        );
+
+        return SeatCategoriesResponseDTO.builder()
+                .seatId(updatedSeat.getSeatId())
+                .seatNumber(updatedSeat.getSeatNumber())
+                .seatFeature(updatedSeat.getSeatFeatures())
+                .viewType(updatedSeat.getViewType())
+                .build();
     }
 
+    @Transactional(readOnly = true)
     public SeatPageResponseDTO getAllSeats(int page, int size) {
+
+        log.info("Fetch all seats | page={} size={}", page, size);
+
         PageRequest pageRequest = PageRequest.of(page, size);
         Page<Seat> seatPage = seatRepo.findAll(pageRequest);
 
-        List<SeatResponseDTO> seats = seatPage.
-                getContent().
-                stream().
-                map(seat -> SeatResponseDTO.builder().
-                        screenId(seat.getSeatId()).
-                        seatCategoryId(seat.getSeatCategory().getId()).
-                        seatFeature(seat.getSeatFeatures()).
-                        seatId(seat.getSeatId()).
-                        seatNumber(seat.getSeatNumber()).
-                        seatLifecycle(seat.getLifeCycle()).
-                        viewType(seat.getViewType()).
-                        build()).toList();
+        List<SeatResponseDTO> seats = seatPage.getContent()
+                .stream()
+                .map(seat -> SeatResponseDTO.builder()
+                        .seatId(seat.getSeatId())
+                        .seatNumber(seat.getSeatNumber())
+                        .screenId(seat.getScreen().getScreenId())
+                        .seatCategoryId(seat.getSeatCategory().getId())
+                        .seatFeature(seat.getSeatFeatures())
+                        .seatLifecycle(seat.getLifeCycle())
+                        .viewType(seat.getViewType())
+                        .build())
+                .toList();
 
-        return SeatPageResponseDTO.
-                builder().
-                seatResponses(seats).
-                hasNext(seatPage.hasNext()).
-                hasPrevious(seatPage.hasPrevious()).
-                page(seatPage.getTotalPages()).
-                size(seatPage.getSize()).
-                totalElements(seatPage.getTotalElements()).
-                totalPages(seatPage.getTotalPages()).
-                build();
+        log.info(
+                "Seats fetched | page={} size={} totalElements={}",
+                seatPage.getNumber(),
+                seatPage.getSize(),
+                seatPage.getTotalElements()
+        );
+
+        return SeatPageResponseDTO.builder()
+                .seatResponses(seats)
+                .page(seatPage.getNumber())
+                .size(seatPage.getSize())
+                .totalElements(seatPage.getTotalElements())
+                .totalPages(seatPage.getTotalPages())
+                .hasNext(seatPage.hasNext())
+                .hasPrevious(seatPage.hasPrevious())
+                .build();
     }
 
+    @Transactional(readOnly = true)
     public SeatResponseDTO getSeatById(Long seatId) {
-        Seat seat = seatRepo.
-                findById(seatId).
-                orElseThrow(() ->
-                        new SeatNotFoundException("Seat not found"));
 
-        return SeatResponseDTO.builder().
-                screenId(seat.getSeatId()).
-                seatCategoryId(seat.getSeatCategory().getId()).
-                seatFeature(seat.getSeatFeatures()).
-                seatId(seat.getSeatId()).
-                seatNumber(seat.getSeatNumber()).
-                seatLifecycle(seat.getLifeCycle()).
-                viewType(seat.getViewType()).
-                build();
+        log.info("Fetch seat by id | seatId={}", seatId);
+
+        Seat seat = seatRepo.findById(seatId)
+                .orElseThrow(() -> new SeatNotFoundException("Seat not found"));
+
+        log.info(
+                "Seat fetched | seatId={} seatNumber={} screenId={}",
+                seat.getSeatId(),
+                seat.getSeatNumber(),
+                seat.getScreen().getScreenId()
+        );
+
+        return SeatResponseDTO.builder()
+                .seatId(seat.getSeatId())
+                .seatNumber(seat.getSeatNumber())
+                .screenId(seat.getScreen().getScreenId())
+                .seatCategoryId(seat.getSeatCategory().getId())
+                .seatFeature(seat.getSeatFeatures())
+                .seatLifecycle(seat.getLifeCycle())
+                .viewType(seat.getViewType())
+                .build();
     }
 
+
+    @Transactional
     public SeatLifeCycleResponseDTO deactivateSeat(Long seatId) {
-        Seat seat = seatRepo.
-                findById(seatId).
-                orElseThrow(() ->
-                        new SeatNotFoundException("Seat not found"));
 
+        log.info("Deactivate seat request | seatId={}", seatId);
 
-        if(seat.getLifeCycle() == SeatLifecycle.INACTIVE){
-            throw new IllegalStateException("Seat is already Inactive");
+        Seat seat = seatRepo.findById(seatId)
+                .orElseThrow(() -> new SeatNotFoundException("Seat not found"));
+
+        if (seat.getLifeCycle() == SeatLifecycle.INACTIVE) {
+            log.warn("Seat already inactive | seatId={}", seatId);
+            throw new IllegalStateException("Seat is already inactive");
         }
 
         seat.setLifeCycle(SeatLifecycle.INACTIVE);
         Seat updatedSeat = seatRepo.save(seat);
 
+        log.info(
+                "Seat deactivated | seatId={} seatNumber={}",
+                updatedSeat.getSeatId(),
+                updatedSeat.getSeatNumber()
+        );
 
-        return SeatLifeCycleResponseDTO
-                .builder()
+        return SeatLifeCycleResponseDTO.builder()
                 .seatNumber(updatedSeat.getSeatNumber())
                 .message("Seat is no longer active")
                 .build();
     }
 
+    @Transactional
     public SeatLifeCycleResponseDTO activateSeat(Long seatId) {
-        Seat seat = seatRepo.
-                findById(seatId).
-                orElseThrow(() ->
-                        new SeatNotFoundException("Seat not found"));
 
-        if (seat.getLifeCycle() == SeatLifecycle.ACTIVE){
-            throw new IllegalStateException("Seat is already Active");
+        log.info("Activate seat request | seatId={}", seatId);
+
+        Seat seat = seatRepo.findById(seatId)
+                .orElseThrow(() -> new SeatNotFoundException("Seat not found"));
+
+        if (seat.getLifeCycle() == SeatLifecycle.ACTIVE) {
+            log.warn("Seat already active | seatId={}", seatId);
+            throw new IllegalStateException("Seat is already active");
         }
 
         seat.setLifeCycle(SeatLifecycle.ACTIVE);
         Seat updatedSeat = seatRepo.save(seat);
 
-        return SeatLifeCycleResponseDTO
-                .builder()
+        log.info(
+                "Seat activated | seatId={} seatNumber={}",
+                updatedSeat.getSeatId(),
+                updatedSeat.getSeatNumber()
+        );
+
+        return SeatLifeCycleResponseDTO.builder()
                 .seatNumber(updatedSeat.getSeatNumber())
                 .message("Seat is now active")
                 .build();
     }
 
+
+    @Transactional
     public SeatResponseDTO updateSeat(Long seatId, @Valid SeatRequestDTO dto) {
+
+        log.info(
+                "Update seat request | seatId={} screenId={} seatCategoryId={}",
+                seatId,
+                dto.getScreenId(),
+                dto.getSeatCategoryId()
+        );
 
         Seat seat = seatRepo.findById(seatId)
                 .orElseThrow(() -> new SeatNotFoundException("Seat not found"));
 
-        boolean isSameSeatNumber =
-                Objects.equals(seat.getSeatNumber(), dto.getSeatNumber());
-
-        if (!isSameSeatNumber){
-            throw new SeatUnavailableException("Seat already exists with that seat number");
-        }
-
         if (seat.getLifeCycle() == SeatLifecycle.INACTIVE) {
-            throw new SeatInActiveException("Seat is no longer active");
+            throw new SeatInActiveException("Inactive seat cannot be updated");
         }
 
-        if (dto.getScreenId() != null) {
+        if (dto.getSeatNumber() != null &&
+                !dto.getSeatNumber().equals(seat.getSeatNumber())) {
+
+            log.warn(
+                    "Seat number change attempt blocked | seatId={} requestedSeatNumber={}",
+                    seatId,
+                    dto.getSeatNumber()
+            );
+
+            throw new UnsupportedOperationException("Seat number cannot be changed");
+        }
+
+        if (dto.getScreenId() != null &&
+                !dto.getScreenId().equals(seat.getScreen().getScreenId())) {
+
             Screen screen = screenRepo.findById(dto.getScreenId())
                     .orElseThrow(() -> new ScreenNotFoundException("Screen not found"));
             seat.setScreen(screen);
         }
 
-        if (dto.getSeatCategoryId() != null) {
+        if (dto.getSeatCategoryId() != null &&
+                !dto.getSeatCategoryId().equals(seat.getSeatCategory().getId())) {
+
             SeatCategory category = seatCategoryRepo.findById(dto.getSeatCategoryId())
                     .orElseThrow(() -> new SeatCategoryNotFoundException("Seat category not found"));
             seat.setSeatCategory(category);
         }
 
-        if (dto.getSeatNumber() != null) {
-            seat.setSeatNumber(dto.getSeatNumber());
-        }
-
         Seat updatedSeat = seatRepo.save(seat);
+
+        log.info(
+                "Seat updated | seatId={} screenId={} seatCategoryId={}",
+                updatedSeat.getSeatId(),
+                updatedSeat.getScreen().getScreenId(),
+                updatedSeat.getSeatCategory().getId()
+        );
 
         return SeatResponseDTO.builder()
                 .seatId(updatedSeat.getSeatId())
+                .seatNumber(updatedSeat.getSeatNumber())
                 .screenId(updatedSeat.getScreen().getScreenId())
                 .seatCategoryId(updatedSeat.getSeatCategory().getId())
-                .seatNumber(updatedSeat.getSeatNumber())
                 .seatFeature(updatedSeat.getSeatFeatures())
                 .viewType(updatedSeat.getViewType())
                 .seatLifecycle(updatedSeat.getLifeCycle())
                 .build();
     }
 
+    @Transactional
     public void deleteSeat(Long seatId) {
-        Seat seat = seatRepo.findById(seatId).orElseThrow(()->new SeatNotFoundException("Seat not found"));
-        if (seat.getLifeCycle() != SeatLifecycle.INACTIVE){
-            throw new SeatActiveException("Active seat cant be removed");
+
+        log.info("Delete seat request | seatId={}", seatId);
+
+        Seat seat = seatRepo.findById(seatId)
+                .orElseThrow(() -> new SeatNotFoundException("Seat not found"));
+
+        if (seat.getLifeCycle() != SeatLifecycle.INACTIVE) {
+            log.warn("Delete blocked for active seat | seatId={}", seatId);
+            throw new SeatActiveException("Active seat cannot be removed");
         }
+
         seatRepo.delete(seat);
+
+        log.info("Seat deleted | seatId={}", seatId);
     }
 }

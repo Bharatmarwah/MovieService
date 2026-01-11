@@ -30,8 +30,8 @@ public class SeatController{
     }
 
     @PatchMapping("/{seatId}")
-    public ResponseEntity<SeatCategoriesResponseDTO> updateSeatCategories(@Valid @RequestBody SeatCategoriesRequestDTO requestDTO , @PathVariable Long seatsId){
-        return ResponseEntity.status(HttpStatus.OK).body(seatService.updateSeatCategories(seatsId,requestDTO));
+    public ResponseEntity<SeatCategoriesResponseDTO> updateSeatCategories(@Valid @RequestBody SeatCategoriesRequestDTO requestDTO , @PathVariable Long seatId){
+        return ResponseEntity.status(HttpStatus.OK).body(seatService.updateSeatCategories(seatId,requestDTO));
     }
 
     @PatchMapping("/{seatId}/deactivate")

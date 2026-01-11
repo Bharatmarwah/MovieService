@@ -165,4 +165,16 @@ public class GlobalExceptionHandler {
         );
 
     }
+    @ExceptionHandler(ScreenInActiveException.class)
+    public ResponseEntity<?> handleScreenInActive(ScreenInActiveException ex) {
+        return ResponseEntity.status(HttpStatus.GONE).body(
+                Map.of(
+                        "error", "SCREEN_INACTIVE",
+                        "message", ex.getMessage(),
+                        "timestamp", LocalDateTime.now()
+                )
+        );
+
+    }
+
 }

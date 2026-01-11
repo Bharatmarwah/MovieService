@@ -26,6 +26,10 @@ public class Screen {
     @JoinColumn(name = "theater_code",nullable = false)
     private Theater theater;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ScreenLifeCycle screenLifeCycle;
+
     @OneToMany(mappedBy = "screen",cascade = CascadeType.PERSIST)// persist meaning only insertion is allowed
     private List<Seat> seats;
 

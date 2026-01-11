@@ -23,7 +23,7 @@ public class SeatCategoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(seatCategoryService.addSeatCategory(dto));
     }
 
-    @PutMapping("/{seatCategoryId}")
+    @PatchMapping("/{seatCategoryId}")
     public ResponseEntity<SeatCategoryResponseDTO> updateSeatCategory(@Valid @RequestBody SeatCategoryRequestDTO dto, @PathVariable Long seatCategoryId) {
         return ResponseEntity.status(HttpStatus.OK).body(seatCategoryService.updateSeatCategory(dto,seatCategoryId));
     }
