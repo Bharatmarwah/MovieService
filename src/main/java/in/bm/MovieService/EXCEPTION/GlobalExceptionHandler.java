@@ -14,75 +14,74 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataAccessException.class)
-    public ResponseEntity<?> handleDatabaseErrors(DataAccessException ex){
+    public ResponseEntity<?> handleDatabaseErrors(DataAccessException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                "error","Database error occurred",
-                "message",ex.getMostSpecificCause().getMessage(),
+                "error", "Database error occurred",
+                "message", ex.getMostSpecificCause().getMessage(),
                 "timestamp", LocalDateTime.now()
         ));
     }
 
 
-
     @ExceptionHandler(MovieNotFoundException.class)
-    public ResponseEntity<?> handleMovieNullPointerErrors(MovieNotFoundException ex){
+    public ResponseEntity<?> handleMovieNullPointerErrors(MovieNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                "error","Movie not Found",
-                "message",ex.getMessage(),
+                "error", "Movie not Found",
+                "message", ex.getMessage(),
                 "timestamp", LocalDateTime.now()
         ));
     }
 
     @ExceptionHandler(TheaterNotFoundException.class)
-    public ResponseEntity<?> handleTheaterNullPointerErrors(TheaterNotFoundException ex){
+    public ResponseEntity<?> handleTheaterNullPointerErrors(TheaterNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                "error","Theater not Found",
-                "message",ex.getMessage(),
+                "error", "Theater not Found",
+                "message", ex.getMessage(),
                 "timestamp", LocalDateTime.now()
         ));
     }
 
     @ExceptionHandler(ShowNotFoundException.class)
-    public ResponseEntity<?> handleShowTimingsNullPointerErrors(ShowNotFoundException ex){
+    public ResponseEntity<?> handleShowTimingsNullPointerErrors(ShowNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                "error","Show timing not Found",
-                "message",ex.getMessage(),
+                "error", "Show timing not Found",
+                "message", ex.getMessage(),
                 "timestamp", LocalDateTime.now()
         ));
     }
 
     @ExceptionHandler(SeatNotFoundException.class)
-    public ResponseEntity<?> handleSeatsNullPointerErrors(SeatNotFoundException ex){
+    public ResponseEntity<?> handleSeatsNullPointerErrors(SeatNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                "error","Seat not Found",
-                "message",ex.getMessage(),
+                "error", "Seat not Found",
+                "message", ex.getMessage(),
                 "timestamp", LocalDateTime.now()
         ));
     }
 
     @ExceptionHandler(ScreenNotFoundException.class)
-    public ResponseEntity<?> handleScreensNullPointerErrors(ScreenNotFoundException ex){
+    public ResponseEntity<?> handleScreensNullPointerErrors(ScreenNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                "error","Screen not Found",
-                "message",ex.getMessage(),
+                "error", "Screen not Found",
+                "message", ex.getMessage(),
                 "timestamp", LocalDateTime.now()
         ));
     }
 
     @ExceptionHandler(ReviewNotFoundException.class)
-    public ResponseEntity<?> handleReviewNullPointerErrors(ReviewNotFoundException ex){
+    public ResponseEntity<?> handleReviewNullPointerErrors(ReviewNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                "error","Review not Found",
-                "message",ex.getMessage(),
+                "error", "Review not Found",
+                "message", ex.getMessage(),
                 "timestamp", LocalDateTime.now()
         ));
     }
 
     @ExceptionHandler(SeatCategoryNotFoundException.class)
-    public ResponseEntity<?> handleSeatCategoryNullPointerErrors(SeatCategoryNotFoundException ex){
+    public ResponseEntity<?> handleSeatCategoryNullPointerErrors(SeatCategoryNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                "error","SeatCategory not Found",
-                "message",ex.getMessage(),
+                "error", "SeatCategory not Found",
+                "message", ex.getMessage(),
                 "timestamp", LocalDateTime.now()
         ));
     }
@@ -144,6 +143,26 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(SeatInActiveException.class)
+    public ResponseEntity<?> handleSeatNotActive(SeatInActiveException ex) {
+        return ResponseEntity.status(HttpStatus.GONE).body(
+                Map.of(
+                        "error", "SEAT_INACTIVE",
+                        "message", ex.getMessage(),
+                        "timestamp", LocalDateTime.now()
+                )
+        );
+    }
 
+    @ExceptionHandler(SeatActiveException.class)
+    public ResponseEntity<?> handleSeatActive(SeatActiveException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                Map.of(
+                        "error", "SEAT_ACTIVE",
+                        "message", ex.getMessage(),
+                        "timestamp", LocalDateTime.now()
+                )
+        );
 
+    }
 }

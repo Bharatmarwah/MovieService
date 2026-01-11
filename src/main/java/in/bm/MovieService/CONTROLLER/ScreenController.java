@@ -26,6 +26,7 @@ public class ScreenController {
     public ResponseEntity<ScreenResponseDTO> updateScreen(@Valid @RequestBody ScreenRequestDTO requestDTO, @PathVariable Long screenId) {
         return ResponseEntity.status(HttpStatus.OK).body(screenService.updateScreen(requestDTO, screenId));
     }
+
     
 
 

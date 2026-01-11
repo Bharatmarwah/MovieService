@@ -26,10 +26,10 @@ public class Screen {
     @JoinColumn(name = "theater_code",nullable = false)
     private Theater theater;
 
-    @OneToMany(mappedBy = "screen",cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "screen",cascade = CascadeType.PERSIST)// persist meaning only insertion is allowed
     private List<Seat> seats;
 
-    @OneToMany(mappedBy = "screen",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "screen",cascade = CascadeType.PERSIST)
     private List<Show> shows;
 
     @OneToMany(mappedBy = "screen", cascade = CascadeType.PERSIST)
