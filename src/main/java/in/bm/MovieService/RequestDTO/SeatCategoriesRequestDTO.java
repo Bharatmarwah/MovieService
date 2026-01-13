@@ -5,7 +5,7 @@ import in.bm.MovieService.ENTITY.ViewType;
 import lombok.Data;
 
 @Data
-public class SeatCategoriesRequestDTO {
+public class    SeatCategoriesRequestDTO {
 
     private SeatFeature seatFeature;
 

@@ -304,12 +304,12 @@ public class TheaterService {
         log.warn("Review deleted | reviewId={}", reviewID);
     }
 
-    public List<TheaterReviewResponseDTO> getAllReviews() {
+    public List<TheaterReviewResponseDTO> getAllReviews(String theaterCode) {
 
         log.info("Fetch all reviews request");
 
         List<TheaterReviewResponseDTO> reviews =
-                theaterReviewRepo.findAll()
+                theaterReviewRepo.findAllReviewsPerTheater(theaterCode)
                         .stream()
                         .map(r -> TheaterReviewResponseDTO.builder()
                                 .id(r.getId())
@@ -405,6 +405,8 @@ public class TheaterService {
                 .hasPrevious(theaterPage.hasPrevious())
                 .build();
     }
+
+    // todo Avoiding theater filter from fetching theaters having retire screens
 
     public TheaterFilterPageResponseDTO searchFilter(
             String movieCode,

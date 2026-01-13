@@ -83,10 +83,10 @@ public class TheaterController {
                 theaterService.editReview(reviewId, dto));
     }
 
-    //theaters/reviews
-    @GetMapping("/reviews")
-    public ResponseEntity<List<TheaterReviewResponseDTO>> getAllReviews() {
-        return ResponseEntity.ok(theaterService.getAllReviews());
+    //theaters/reviews/{theaterCode}
+    @GetMapping("/reviews/{theaterCode}")
+    public ResponseEntity<List<TheaterReviewResponseDTO>> getAllReviews(@PathVariable String theaterCode) {
+        return ResponseEntity.ok(theaterService.getAllReviews(theaterCode));
     }
 
     // ADMIN CONTROLLER APIS

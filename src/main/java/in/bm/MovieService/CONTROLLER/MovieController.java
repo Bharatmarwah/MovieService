@@ -81,12 +81,3 @@ public class MovieController {
 
 
 }
-//movies
-//{movieCode}/details
-//movies/search
-//movies/{moviesCode}
-
-
-
-// showtime will list out the theaters near using latitude and longitude
-// done by show time -> screen and then theaters

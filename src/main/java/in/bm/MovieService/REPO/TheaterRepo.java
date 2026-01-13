@@ -23,11 +23,12 @@ public interface TheaterRepo extends JpaRepository<Theater, String> {
             JOIN sh.movie m
             JOIN s.seatCategories sc
             WHERE t.city = :city
-            AND (:movieCode IS NULL OR m.movieCode = :movieCode)
+            AND (m.movieCode = :movieCode)
             AND (:time IS NULL OR sh.showTime >= :time)
             AND (:seatPrice IS NULL OR sc.price <= :seatPrice)
             AND (:status IS NULL OR t.status = :status)
             """)
+
     Page<Theater> filter(
             @Param("city") String city,
             @Param("movieCode") String movieCode,

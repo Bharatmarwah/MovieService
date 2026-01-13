@@ -10,6 +10,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @Builder
 public class TheaterReviewResponseDTO {
+
     private long id;
     private String username;
     private String comment;
