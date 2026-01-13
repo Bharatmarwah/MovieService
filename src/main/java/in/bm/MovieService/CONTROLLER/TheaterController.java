@@ -124,25 +124,28 @@ public class TheaterController {
                 theaterService.getTheaterByStatus(status, page, size));
     }
 
-    @GetMapping("/filters")
-    public ResponseEntity<TheaterFilterPageResponseDTO> filters(
-            @RequestParam(required = false) String movieCode,
-            @RequestParam(required = false) String city,
+        @GetMapping("/filters")
+        public ResponseEntity<TheaterFilterPageResponseDTO> filters(
+                @RequestParam(required = true) String movieCode,
+                @RequestParam(required = true) String city,
 
-            @RequestParam(required = false)
-            @DateTimeFormat(pattern = "HH:mm")
-            LocalTime time,
+                @RequestParam(required = false)
+                @DateTimeFormat(pattern = "HH:mm")
+                LocalTime time,
 
-            @RequestParam(required = false) Double seatPrice,
+                @RequestParam(required = false) Double seatPrice,
 
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(theaterService.searchFilter(
-                        movieCode, city, time, seatPrice, page, size
-                ));
-    }
+                @RequestParam(defaultValue = "0") int page,
+                @RequestParam(defaultValue = "10")  int size,
+
+                @RequestParam(required = true) double latitude,
+                @RequestParam(required = true) double longitude
+        ) {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(theaterService.searchFilter(
+                            movieCode, city, time, seatPrice, page, size , latitude, longitude
+                    ));
+        }
 
 }

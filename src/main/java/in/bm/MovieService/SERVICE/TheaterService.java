@@ -412,34 +412,55 @@ public class TheaterService {
             LocalTime time,
             Double seatPrice,
             int page,
-            int size
+            int size,
+            double userLat,
+            double userLon
     ) {
-        PageRequest pageRequest =
-                PageRequest.of(page, size);
+
+        PageRequest pageRequest = PageRequest.of(page, size);
 
         Page<Theater> theaterPage =
-                theaterRepo.filter(movieCode, city, time, seatPrice,
-                        TheaterStatus.ACTIVE, pageRequest);
+                theaterRepo.filter(
+                        city,
+                        movieCode,
+                        time,
+                        seatPrice,
+                        TheaterStatus.ACTIVE,
+                        pageRequest
+                );
 
-        List<TheaterResponseDTO> theaters = theaterPage.getContent()
-                .stream()
-                .map(theater -> TheaterResponseDTO.builder()
-                        .branchName(theater.getBranchName())
-                        .brand(theater.getBrand())
-                        .theaterCode(theater.getTheatreCode())
-                        .city(theater.getCity())
-                        .avgRating(theater.getAvgRating())
-                        .allowsCancellation(theater.isAllowsCancellation())
-                        .build())
-                .toList();
+        List<TheaterResponseDTO> theaters =
+                theaterPage.getContent()
+                        .stream()
+                        .map(theater -> {
+
+                            double distanceKm = distanceKm(
+                                    userLat,
+                                    userLon,
+                                    theater.getLatitude(),
+                                    theater.getLongitude()
+                            );
+
+                            return TheaterResponseDTO.builder()
+                                    .theaterCode(theater.getTheatreCode())
+                                    .brand(theater.getBrand())
+                                    .branchName(theater.getBranchName())
+                                    .city(theater.getCity())
+                                    .avgRating(theater.getAvgRating())
+                                    .allowsCancellation(theater.isAllowsCancellation())
+                                    .distanceKm(distanceKm)
+                                    .build();
+                        })
+                        .toList();
 
         return TheaterFilterPageResponseDTO.builder()
                 .theaters(theaters)
-                .hasNext(theaterPage.hasNext())
-                .hasPrevious(theaterPage.hasPrevious())
                 .page(theaterPage.getNumber())
+                .size(theaterPage.getSize())
                 .totalElements(theaterPage.getTotalElements())
                 .totalPages(theaterPage.getTotalPages())
+                .hasNext(theaterPage.hasNext())
+                .hasPrevious(theaterPage.hasPrevious())
                 .build();
     }
 
