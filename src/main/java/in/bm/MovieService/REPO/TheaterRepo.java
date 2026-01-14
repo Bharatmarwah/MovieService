@@ -1,5 +1,6 @@
 package in.bm.MovieService.REPO;
 
+import in.bm.MovieService.ENTITY.ScreenLifeCycle;
 import in.bm.MovieService.ENTITY.Theater;
 import in.bm.MovieService.ENTITY.TheaterStatus;
 import org.springframework.data.domain.Page;
@@ -27,6 +28,7 @@ public interface TheaterRepo extends JpaRepository<Theater, String> {
             AND (:time IS NULL OR sh.showTime >= :time)
             AND (:seatPrice IS NULL OR sc.price <= :seatPrice)
             AND (:status IS NULL OR t.status = :status)
+            AND (:lifeCycle IS NULL OR s.screenLifeCycle =:lifeCycle)
             """)
 
     Page<Theater> filter(
@@ -35,6 +37,7 @@ public interface TheaterRepo extends JpaRepository<Theater, String> {
             @Param("time") LocalTime time,
             @Param("seatPrice") Double seatPrice,
             @Param("status") TheaterStatus status,
+            @Param("lifeCycle") ScreenLifeCycle lifeCycle,
             Pageable pageable
     );
 

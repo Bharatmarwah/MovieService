@@ -1,9 +1,6 @@
 package in.bm.MovieService.SERVICE;
 
-import in.bm.MovieService.ENTITY.Theater;
-import in.bm.MovieService.ENTITY.TheaterDetails;
-import in.bm.MovieService.ENTITY.TheaterReview;
-import in.bm.MovieService.ENTITY.TheaterStatus;
+import in.bm.MovieService.ENTITY.*;
 import in.bm.MovieService.EXCEPTION.ReviewNotFoundException;
 import in.bm.MovieService.EXCEPTION.TheaterInactiveException;
 import in.bm.MovieService.EXCEPTION.TheaterNotFoundException;
@@ -406,8 +403,6 @@ public class TheaterService {
                 .build();
     }
 
-    // todo Avoiding theater filter from fetching theaters having retire screens
-
     public TheaterFilterPageResponseDTO searchFilter(
             String movieCode,
             String city,
@@ -428,6 +423,7 @@ public class TheaterService {
                         time,
                         seatPrice,
                         TheaterStatus.ACTIVE,
+                        ScreenLifeCycle.ACTIVE,
                         pageRequest
                 );
 
