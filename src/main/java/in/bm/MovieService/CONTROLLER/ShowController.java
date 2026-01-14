@@ -4,6 +4,7 @@ package in.bm.MovieService.CONTROLLER;
 import in.bm.MovieService.RequestDTO.BookingRequestDTO;
 import in.bm.MovieService.RequestDTO.ShowRequestDTO;
 import in.bm.MovieService.ResponseDTO.BookingResponseDTO;
+import in.bm.MovieService.ResponseDTO.ShowDateTimeResponseDTO;
 import in.bm.MovieService.ResponseDTO.ShowPageResponseDTO;
 import in.bm.MovieService.ResponseDTO.ShowResponseDTO;
 import in.bm.MovieService.SERVICE.ShowService;
@@ -12,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -38,6 +41,13 @@ public class ShowController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    @GetMapping("/by-movie/{movieCode}")
+    public ResponseEntity<List<ShowDateTimeResponseDTO>> getShowsByMovieCode(@PathVariable String movieCode){
+        return ResponseEntity.status(HttpStatus.OK).body(showService.getShowsByMovieCode(movieCode));
+    }
+
+
+// ADMIN APIS
     @GetMapping
     public ResponseEntity<ShowPageResponseDTO> getAllShows(@RequestParam(defaultValue = "0") int page,
                                                            @RequestParam(defaultValue = "10") int size){

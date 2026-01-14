@@ -9,10 +9,27 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-public interface ShowRepo extends JpaRepository<Show,Long> {
+import java.util.List;
+import java.util.Optional;
+
+public interface ShowRepo extends JpaRepository<Show, Long> {
 
 
     @Transactional(readOnly = true)
     @Query("SELECT sh FROM Show sh WHERE sh.movie.status =:status")
     Page<Show> findALlShowWithActiveMovies(PageRequest pageRequest, @Param("status") MovieStatus movieStatus);
+
+    @Transactional(readOnly = true)
+    @Query("""
+                SELECT sh
+                FROM Show sh
+                JOIN sh.movie m
+                WHERE m.movieCode = :movieCode
+                  AND m.status = :movieStatus
+            """)
+    List<Show> findShowsByMovieCode(
+            @Param("movieCode") String movieCode,
+            @Param("movieStatus") MovieStatus movieStatus
+    );
+
 }

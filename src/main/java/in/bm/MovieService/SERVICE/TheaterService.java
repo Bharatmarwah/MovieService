@@ -37,7 +37,7 @@ public class TheaterService {
                 dto.getBrand(), dto.getBranchName());
 
         Theater theater = new Theater();
-        theater.setTheatreCode(generateCode("TH"));
+        theater.setTheatreCode(generateCode());
         theater.setBrand(dto.getBrand());
         theater.setBranchName(dto.getBranchName());
         theater.setCity(dto.getCity());
@@ -360,8 +360,8 @@ public class TheaterService {
                 .build();
     }
 
-    private String generateCode(String prefix) {
-        return prefix + UUID.randomUUID().toString().substring(0, 8);
+    private String generateCode() {
+        return "TH" + UUID.randomUUID().toString().substring(0, 8);
     }
 
     private static double distanceKm(double lat1, double lon1, double lat2, double lon2) {

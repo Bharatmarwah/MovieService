@@ -24,7 +24,6 @@ public class TheaterController {
 
     private final TheaterService theaterService;
 
-
     @PostMapping
     public ResponseEntity<TheaterInfoDTO> addTheater(
             @Valid @RequestBody TheaterRequestDto theaterRequestDto) {
@@ -114,7 +113,8 @@ public class TheaterController {
         return ResponseEntity.ok(theaterService.activate(theaterCode));
     }
 
-    @GetMapping
+    // todo make a separate controller for admin apis
+    @GetMapping("/admin")
     public ResponseEntity<TheaterPageResponseDTO> getTheatersByStatus(
             @RequestParam TheaterStatus status,
             @RequestParam int page,

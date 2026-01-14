@@ -7,11 +7,13 @@ import in.bm.MovieService.REPO.ScreenRepo;
 import in.bm.MovieService.REPO.ShowRepo;
 import in.bm.MovieService.RequestDTO.ShowRequestDTO;
 import in.bm.MovieService.ResponseDTO.BookingResponseDTO;
+import in.bm.MovieService.ResponseDTO.ShowDateTimeResponseDTO;
 import in.bm.MovieService.ResponseDTO.ShowPageResponseDTO;
 import in.bm.MovieService.ResponseDTO.ShowResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -237,5 +239,20 @@ public class ShowService {
                 meridiem(show.getMeridiem()).
                 movieCode(show.getMovie().getMovieCode()).
                 build();
+    }
+
+    public List<ShowDateTimeResponseDTO> getShowsByMovieCode(String movieCode) {
+        List<Show> shows = showRepo.findShowsByMovieCode(movieCode, MovieStatus.ACTIVE);
+        return shows.
+                stream().
+                map(show ->
+                        ShowDateTimeResponseDTO
+                                .builder().
+                                showId(show.getShowId()).
+                                showTime(show.getShowTime()).
+                                showDate(show.getShowDate()).
+                                meridiem(show.getMeridiem()).
+                                dayOfWeek(show.getDayOfWeek()).
+                                build()).toList();
     }
 }
