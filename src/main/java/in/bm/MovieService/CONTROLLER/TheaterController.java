@@ -1,7 +1,5 @@
 package in.bm.MovieService.CONTROLLER;
 
-import in.bm.MovieService.ENTITY.TheaterStatus;
-import in.bm.MovieService.RequestDTO.TheaterRequestDto;
 import in.bm.MovieService.RequestDTO.TheaterReviewRequestDTO;
 import in.bm.MovieService.ResponseDTO.*;
 import in.bm.MovieService.SERVICE.TheaterService;
@@ -24,23 +22,6 @@ public class TheaterController {
 
     private final TheaterService theaterService;
 
-    @PostMapping
-    public ResponseEntity<TheaterInfoDTO> addTheater(
-            @Valid @RequestBody TheaterRequestDto theaterRequestDto) {
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(theaterService.addTheater(theaterRequestDto));
-    }
-
-    //theaters/{theaterCode}/reviews
-    @PostMapping("/{theaterCode}/reviews")
-    public ResponseEntity<TheaterReviewResponseDTO> addReview(
-            @PathVariable String theaterCode,
-            @Valid @RequestBody TheaterReviewRequestDTO theaterReviewRequestDTO) {
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(theaterService.addReview(theaterCode, theaterReviewRequestDTO));
-    }
 
     // theaters/{theaterCode}
     @GetMapping("/{theaterCode}")
@@ -62,18 +43,48 @@ public class TheaterController {
                 theaterService.getTheaterDetailsById(theaterCode));
     }
 
-    //theaters/{theaterCode}
-    @PutMapping("/{theaterCode}")
-    public ResponseEntity<TheaterInfoDTO> updateTheater(
-            @PathVariable String theaterCode,
-            @Valid @RequestBody TheaterRequestDto dto) {
+    //theaters/reviews/{theaterCode}
+    @GetMapping("/reviews/{theaterCode}")
+    public ResponseEntity<List<TheaterReviewResponseDTO>> getAllReviews(@PathVariable String theaterCode) {
+        return ResponseEntity.ok(theaterService.getAllReviews(theaterCode));
+    }
 
-        return ResponseEntity.ok(
-                theaterService.updateTheater(theaterCode, dto));
+    @GetMapping("/filters")
+    public ResponseEntity<TheaterFilterPageResponseDTO> filters(
+            @RequestParam(required = true) String movieCode,
+            @RequestParam(required = true) String city,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(pattern = "HH:mm")
+            LocalTime time,
+
+            @RequestParam(required = false) Double seatPrice,
+
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+
+            @RequestParam(required = true) double latitude,
+            @RequestParam(required = true) double longitude
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(theaterService.searchFilter(
+                        movieCode, city, time, seatPrice, page, size, latitude, longitude
+                ));
+    }
+
+    //theaters/{theaterCode}/reviews
+    @PostMapping("/theaters/{theaterCode}/reviews")
+    public ResponseEntity<TheaterReviewResponseDTO> addReview(
+            @PathVariable String theaterCode,
+            @Valid @RequestBody TheaterReviewRequestDTO theaterReviewRequestDTO) {
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(theaterService.addReview(theaterCode, theaterReviewRequestDTO));
     }
 
     //theaters/reviews/{reviewsId}
-    @PutMapping("/reviews/{reviewId}")
+    @PutMapping("/theater-reviews/{reviewId}")
     public ResponseEntity<TheaterReviewResponseDTO> editReview(
             @PathVariable long reviewId,
             @Valid @RequestBody TheaterReviewRequestDTO dto) {
@@ -82,70 +93,8 @@ public class TheaterController {
                 theaterService.editReview(reviewId, dto));
     }
 
-    //theaters/reviews/{theaterCode}
-    @GetMapping("/reviews/{theaterCode}")
-    public ResponseEntity<List<TheaterReviewResponseDTO>> getAllReviews(@PathVariable String theaterCode) {
-        return ResponseEntity.ok(theaterService.getAllReviews(theaterCode));
-    }
 
-    // ADMIN CONTROLLER APIS
 
-    //theaters/reviews/{reviewsId}
-    @DeleteMapping("/reviews/{reviewId}")
-    public ResponseEntity<Void> deleteReview(@PathVariable long reviewId) {
-        theaterService.deleteReview(reviewId);
-        return ResponseEntity.noContent().build();
-    }
-
-    //theaters/{theaterCode}/deactivate
-    @PatchMapping("/{theaterCode}/deactivate")
-    public ResponseEntity<TheaterStatusDTO> deactivate(
-            @PathVariable String theaterCode) {
-
-        return ResponseEntity.ok(theaterService.deactivate(theaterCode));
-    }
-
-    //theaters/{theaterCode}/activate
-    @PatchMapping("/{theaterCode}/activate")
-    public ResponseEntity<TheaterStatusDTO> activate(
-            @PathVariable String theaterCode) {
-
-        return ResponseEntity.ok(theaterService.activate(theaterCode));
-    }
-
-    // todo make a separate controller for admin apis
-    @GetMapping("/admin")
-    public ResponseEntity<TheaterPageResponseDTO> getTheatersByStatus(
-            @RequestParam TheaterStatus status,
-            @RequestParam int page,
-            @RequestParam int size) {
-
-        return ResponseEntity.ok(
-                theaterService.getTheaterByStatus(status, page, size));
-    }
-
-        @GetMapping("/filters")
-        public ResponseEntity<TheaterFilterPageResponseDTO> filters(
-                @RequestParam(required = true) String movieCode,
-                @RequestParam(required = true) String city,
-
-                @RequestParam(required = false)
-                @DateTimeFormat(pattern = "HH:mm")
-                LocalTime time,
-
-                @RequestParam(required = false) Double seatPrice,
-
-                @RequestParam(defaultValue = "0") int page,
-                @RequestParam(defaultValue = "10")  int size,
-
-                @RequestParam(required = true) double latitude,
-                @RequestParam(required = true) double longitude
-        ) {
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(theaterService.searchFilter(
-                            movieCode, city, time, seatPrice, page, size , latitude, longitude
-                    ));
-        }
+    //todo GET /theaters/{theaterCode}/shows
 
 }

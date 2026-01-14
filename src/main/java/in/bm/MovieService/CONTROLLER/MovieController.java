@@ -1,6 +1,6 @@
 package in.bm.MovieService.CONTROLLER;
 
-import in.bm.MovieService.RequestDTO.MovieRequestDTO;
+
 import in.bm.MovieService.RequestDTO.MovieReviewRequestDTO;
 import in.bm.MovieService.ResponseDTO.*;
 import in.bm.MovieService.SERVICE.MovieService;
@@ -33,13 +33,6 @@ public class MovieController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    //movies/add
-    @PostMapping
-    public ResponseEntity<MovieInfoDTO> addMovies(@Valid @RequestBody MovieRequestDTO movieRequestDTO) {
-        MovieInfoDTO response = movieService.addMovie(movieRequestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
     @GetMapping("/search")
     public ResponseEntity<MoviePageResponseDTO> searchMovie(
             @RequestParam String q,
@@ -62,22 +55,5 @@ public class MovieController {
         MovieReviewDto response = movieService.addReview(movieCode, movieReviewRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-
-    @PutMapping("/{movieCode}")
-    public ResponseEntity<MovieInfoDTO> updateMovie(@PathVariable String movieCode, @Valid @RequestBody MovieRequestDTO movieRequestDTO) {
-        return ResponseEntity.status(HttpStatus.OK).body(movieService.updateMovie(movieCode, movieRequestDTO));
-    }
-
-    @PatchMapping("/{movieCode}/deactivate")
-    public ResponseEntity<MovieStatusDTO> deactivate(@PathVariable String movieCode) {
-        return ResponseEntity.status(HttpStatus.OK).body(movieService.deactivate(movieCode));
-    }
-
-    @PatchMapping("/{movieCode}/activate")
-    public ResponseEntity<MovieStatusDTO> activate(@PathVariable String movieCode) {
-        return ResponseEntity.status(HttpStatus.OK).body(movieService.activate(movieCode));
-    }
-
-
 
 }
