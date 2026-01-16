@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
-import java.time.LocalTime;
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -55,8 +55,8 @@ public class TheaterController {
             @RequestParam(required = true) String city,
 
             @RequestParam(required = false)
-            @DateTimeFormat(pattern = "HH:mm")
-            LocalTime time,
+            @DateTimeFormat(pattern = "yyyy-MM-dd")
+            LocalDate date,
 
             @RequestParam(required = false) Double seatPrice,
 
@@ -69,32 +69,40 @@ public class TheaterController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(theaterService.searchFilter(
-                        movieCode, city, time, seatPrice, page, size, latitude, longitude
+                        movieCode, city, date, seatPrice, page, size, latitude, longitude
                 ));
     }
 
     //theaters/{theaterCode}/reviews
-    @PostMapping("/theaters/{theaterCode}/reviews")
+    @PostMapping("/{theaterCode}/reviews")
     public ResponseEntity<TheaterReviewResponseDTO> addReview(
             @PathVariable String theaterCode,
-            @Valid @RequestBody TheaterReviewRequestDTO theaterReviewRequestDTO) {
+            @Valid @RequestBody TheaterReviewRequestDTO theaterReviewRequestDTO,
+            @RequestHeader("x-user-id") String userId) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(theaterService.addReview(theaterCode, theaterReviewRequestDTO));
+                .body(theaterService.addReview(theaterCode, theaterReviewRequestDTO, userId));
     }
 
     //theaters/reviews/{reviewsId}
-    @PutMapping("/theater-reviews/{reviewId}")
+    @PutMapping("/reviews/{reviewId}")
     public ResponseEntity<TheaterReviewResponseDTO> editReview(
             @PathVariable long reviewId,
-            @Valid @RequestBody TheaterReviewRequestDTO dto) {
+            @Valid @RequestBody TheaterReviewRequestDTO dto,
+            @RequestHeader("x-user-id") String userId) {
 
         return ResponseEntity.ok(
-                theaterService.editReview(reviewId, dto));
+                theaterService.editReview(reviewId, dto, userId));
     }
 
 
+    @DeleteMapping("/reviews/{reviewId}")
+    public ResponseEntity<Void> deleteReviewByUser(
+            @RequestHeader("x-user-id") String userId,
+            @PathVariable Long reviewId) {
 
-    //todo GET /theaters/{theaterCode}/shows
+        theaterService.deleteReviewByUser(userId, reviewId);
+        return ResponseEntity.noContent().build();
+    }
 
 }

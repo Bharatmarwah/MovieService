@@ -14,12 +14,15 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "reviews")
+@Table(name = "movie_reviews")
 public class MovieReview {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    private String userId;
+
     private String username;
     private double rating;
     @Column(length = 2000)

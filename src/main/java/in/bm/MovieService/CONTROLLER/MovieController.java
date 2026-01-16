@@ -2,6 +2,7 @@ package in.bm.MovieService.CONTROLLER;
 
 
 import in.bm.MovieService.RequestDTO.MovieReviewRequestDTO;
+import in.bm.MovieService.RequestDTO.TheaterReviewRequestDTO;
 import in.bm.MovieService.ResponseDTO.*;
 import in.bm.MovieService.SERVICE.MovieService;
 import jakarta.validation.Valid;
@@ -49,11 +50,33 @@ public class MovieController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    // Only called when booking status=COMPLETED & showEndTIme< now
     @PostMapping("/{movieCode}/reviews")
-    public ResponseEntity<MovieReviewDto> addReview(@PathVariable String movieCode, @Valid @RequestBody MovieReviewRequestDTO movieReviewRequestDTO) {
-        MovieReviewDto response = movieService.addReview(movieCode, movieReviewRequestDTO);
+    public ResponseEntity<MovieReviewDto> addReview(@PathVariable String movieCode, @Valid @RequestBody MovieReviewRequestDTO movieReviewRequestDTO ,  @RequestHeader("x-user-id") String userId) {
+        MovieReviewDto response = movieService.addReview(movieCode, movieReviewRequestDTO, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @PutMapping("/reviews/{reviewId}")
+    public ResponseEntity<MovieReviewDto> editReview(
+            @PathVariable long reviewId,
+            @Valid @RequestBody MovieReviewRequestDTO dto,
+            @RequestHeader("x-user-id") String userId) {
+
+        return ResponseEntity.ok(
+                movieService.editReview(reviewId, dto, userId));
+    }
+
+    @DeleteMapping("/reviews/{reviewId}")
+    public ResponseEntity<Void> deleteReviewUser(
+            @RequestHeader("x-user-id") String userId,
+            @PathVariable Long reviewId) {
+
+        movieService.deleteReviewUser(userId, reviewId);
+        return ResponseEntity.noContent().build();
+    }
+
+
+
+
 
 }

@@ -2,6 +2,8 @@ package in.bm.MovieService.ResponseDTO;
 
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -16,7 +18,7 @@ public class TheaterResponseDTO {
     private double distanceKm;
     private boolean allowsCancellation;
     private double avgRating;
-
+    private List<ShowTimeResponseDTO> showTimeResponse;
 
 
 

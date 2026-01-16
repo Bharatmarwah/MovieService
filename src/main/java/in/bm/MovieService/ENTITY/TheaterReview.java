@@ -20,6 +20,10 @@ public class TheaterReview {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @Column(nullable = false)
+    private String userId;
+
     private String username;
     @Column(length = 2000)
     private String comment;

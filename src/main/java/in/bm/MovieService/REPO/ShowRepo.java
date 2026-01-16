@@ -9,8 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 public interface ShowRepo extends JpaRepository<Show, Long> {
 
@@ -32,4 +32,10 @@ public interface ShowRepo extends JpaRepository<Show, Long> {
             @Param("movieStatus") MovieStatus movieStatus
     );
 
+    @Transactional(readOnly = true)
+    @Query("SELECT sh FROM Show sh WHERE sh.movie.movieCode=:movieCode AND sh.screen.theater.theatreCode=:theaterCode AND sh.showDate=:date")
+    List<Show> findShowsTime(@Param("movieCode")
+                             String movieCode,
+                             @Param("theaterCode") String theatreCode,
+                             @Param("date") LocalDate date);
 }

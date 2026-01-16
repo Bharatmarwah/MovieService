@@ -6,23 +6,21 @@ import in.bm.MovieService.REPO.MovieRepo;
 import in.bm.MovieService.REPO.ScreenRepo;
 import in.bm.MovieService.REPO.ShowRepo;
 import in.bm.MovieService.RequestDTO.ShowRequestDTO;
-import in.bm.MovieService.ResponseDTO.BookingResponseDTO;
-import in.bm.MovieService.ResponseDTO.ShowDateTimeResponseDTO;
-import in.bm.MovieService.ResponseDTO.ShowPageResponseDTO;
-import in.bm.MovieService.ResponseDTO.ShowResponseDTO;
+import in.bm.MovieService.ResponseDTO.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 
 @Service
@@ -106,44 +104,6 @@ public class ShowService {
                 .dayOfWeek(savedShow.getDayOfWeek())
                 .meridiem(savedShow.getMeridiem())
                 .build();
-    }
-
-    @Transactional
-    public BookingResponseDTO previewBooking(in.bm.MovieService.RequestDTO.BookingRequestDTO requestDTO) {
-        Show show = showRepo.findById(requestDTO.getShowId())
-                .orElseThrow(()
-                        -> new ShowNotFoundException("show is not found"));
-
-        Set<String> requestSeats = new HashSet<>(requestDTO.getSeatNumbers());
-
-        List<Seat> matchedSeats = show.getScreen()
-                .getSeats()
-                .stream()
-                .filter(seat -> requestSeats.contains(seat.getSeatNumber()))
-                .toList();
-
-        if (matchedSeats.size() != requestSeats.size()) {
-            throw new InvalidSeatException("Invalid seat number(s)");
-        }
-
-        if (matchedSeats.stream().anyMatch(
-                seat -> seat.getLifeCycle() != SeatLifecycle.ACTIVE)) {
-            throw new SeatUnavailableException("One or more seats are unavailable");
-        }
-
-        double baseAmount = matchedSeats.stream()
-                .mapToDouble(seat -> seat.getSeatCategory().getPrice())
-                .sum();
-
-        List<String> seatNumbers = matchedSeats.stream().map(Seat::getSeatNumber).toList();
-
-        return BookingResponseDTO
-                .builder()
-                .showId(show.getShowId())
-                .movieCode(show.getMovie().getMovieCode())
-                .theaterCode(show.getScreen().getTheater().getTheatreCode())
-                .seatNumbers(seatNumbers).baseAmount(baseAmount).build();
-
     }
 
     @Transactional
@@ -255,4 +215,63 @@ public class ShowService {
                                 dayOfWeek(show.getDayOfWeek()).
                                 build()).toList();
     }
+
+    public List<ShowTimeResponseDTO> getShowsForTheater(String movieCode, String theatreCode, LocalDate date) {
+        List<Show> shows = showRepo.findShowsTime(movieCode,theatreCode,date);
+        return shows
+                .stream()
+                .map(show->ShowTimeResponseDTO
+                        .builder()
+                        .showId(show.getShowId())
+                        .startTime(show.getShowTime())
+                        .build())
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public ShowSeatsResponse seatsByShowId(Long showId) {
+
+        Show show = showRepo.findById(showId)
+                .orElseThrow(() ->
+                        new ShowNotFoundException("Show not found"));
+
+        Screen screen = show.getScreen();
+        if (screen == null) {
+            throw new ScreenNotFoundException("Screen not found");
+        }
+
+        if (screen.getScreenLifeCycle() != ScreenLifeCycle.ACTIVE) {
+            throw new ScreenInActiveException("Screen is inactive");
+        }
+
+        List<Seat> seatList = screen.getSeats();
+        if (seatList == null || seatList.isEmpty()) {
+            throw new SeatNotFoundException("No seats configured for screen");
+        }
+
+        List<SeatsResponseDTO> seats =
+                seatList.stream()
+                        .filter(seat -> seat.getLifeCycle() == SeatLifecycle.ACTIVE)
+                        .map(seat -> SeatsResponseDTO.builder()
+                                .seatId(seat.getSeatId())
+                                .seatNumber(seat.getSeatNumber())
+                                .seatType(seat.getSeatCategory().getSeatType())
+                                .view(seat.getViewType())
+                                .price(seat.getSeatCategory().getPrice())
+                                .feature(seat.getSeatFeatures())
+                                .status(seat.getStatus())
+                                .build()
+                        )
+                        .toList();
+
+        return ShowSeatsResponse.builder()
+                .showId(show.getShowId())
+                .screenName(screen.getScreenName())
+                .movieCode(show.getMovie().getMovieCode())
+                .theaterCode(screen.getTheater().getTheatreCode())
+                .startTime(show.getShowTime())
+                .seats(seats)
+                .build();
+    }
+
 }

@@ -1,23 +1,20 @@
 package in.bm.MovieService.SERVICE;
 
-import in.bm.MovieService.ENTITY.Movie;
-import in.bm.MovieService.ENTITY.MovieDetails;
-import in.bm.MovieService.ENTITY.MovieReview;
-import in.bm.MovieService.ENTITY.MovieStatus;
-import in.bm.MovieService.EXCEPTION.MovieInactiveException;
-import in.bm.MovieService.EXCEPTION.MovieNotFoundException;
+import in.bm.MovieService.ENTITY.*;
+import in.bm.MovieService.EXCEPTION.*;
 import in.bm.MovieService.REPO.MovieDetailsRepo;
 import in.bm.MovieService.REPO.MovieRepo;
 import in.bm.MovieService.REPO.MovieReviewRepo;
 import in.bm.MovieService.RequestDTO.MovieRequestDTO;
 import in.bm.MovieService.RequestDTO.MovieReviewRequestDTO;
 import in.bm.MovieService.ResponseDTO.*;
-import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -34,6 +31,7 @@ public class MovieService {
     private final MovieDetailsRepo movieDetailsRepo;
     private final MovieReviewRepo movieReviewRepo;
 
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public MoviePageResponseDTO getMovies(int page, int size) {
 
         log.info("Fetch movies request | page={} size={}", page, size);
@@ -67,6 +65,7 @@ public class MovieService {
     }
 
 
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public MovieDetailsResponseDTO getMovieDetails(String movieCode) {
 
         log.info("Fetch movie details request | movieCode={}", movieCode);
@@ -161,6 +160,7 @@ public class MovieService {
                 .build();
     }
 
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public MovieResponseDTO getMovieById(String movieCode) {
 
         log.info("Fetch movie request | movieCode={}", movieCode);
@@ -187,7 +187,8 @@ public class MovieService {
     }
 
 
-    public MovieReviewDto addReview(String movieCode, MovieReviewRequestDTO dto) {
+    @org.springframework.transaction.annotation.Transactional
+    public MovieReviewDto addReview(String movieCode, MovieReviewRequestDTO dto, String userId) {
 
         log.info("Add review request | movieCode={} user={}",
                 movieCode, dto.getUsername());
@@ -204,6 +205,7 @@ public class MovieService {
         }
 
         MovieReview review = new MovieReview();
+        review.setUserId(userId);
         review.setUsername(dto.getUsername());
         review.setRating(dto.getRating());
         review.setComment(dto.getComment());
@@ -225,6 +227,7 @@ public class MovieService {
                 .build();
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public MovieStatusDTO activate(String movieCode) {
 
         log.info("Activate movie request | movieCode={}", movieCode);
@@ -248,6 +251,7 @@ public class MovieService {
                 .build();
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public MovieInfoDTO updateMovie(String movieCode, MovieRequestDTO movieRequestDTO) {
 
         log.info("Update movie request | movieCode={}", movieCode);
@@ -301,6 +305,7 @@ public class MovieService {
                 .build();
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public MovieStatusDTO deactivate(String movieCode) {
 
         log.info("Deactivate movie request | movieCode={}", movieCode);
@@ -325,6 +330,7 @@ public class MovieService {
     }
 
 
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public MoviePageResponseDTO searchMovie(String q, int page, int size) {
 
         log.info("Search movie request | query='{}' page={} size={}", q, page, size);
@@ -360,6 +366,7 @@ public class MovieService {
         return prefix + UUID.randomUUID().toString().substring(0, 8);
     }
 
+    @org.springframework.transaction.annotation.Transactional
     private void updateMovieRating(MovieDetails details) {
 
         double avgRating = details.getMovieReviews()
@@ -375,5 +382,50 @@ public class MovieService {
 
         log.info("Movie rating updated | avgRating={} totalReviews={}",
                 avgRating, details.getTotalReviews());
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public void deleteReviewUser(String userId, Long reviewId) {
+        MovieReview review = movieReviewRepo.findById(reviewId).orElseThrow(()->new ReviewNotFoundException("Review not found"));
+        if(!review.getUserId().equals(userId)){
+            throw new UnauthorizedActionException("You cannot modify this review");
+        }
+        movieReviewRepo.delete(review);
+    }
+
+    public MovieReviewDto editReview(long reviewId, @Valid MovieReviewRequestDTO dto, String userId) {
+        log.info("Edit review request | reviewId={}", reviewId);
+
+        MovieReview review = movieReviewRepo.findById(reviewId)
+                .orElseThrow(() -> {
+                    log.warn("Edit rejected | review not found reviewId={}", reviewId);
+                    return new ReviewNotFoundException("Review not found");
+                });
+
+        if (review.getMovieDetails().getMovie().getStatus() != MovieStatus.ACTIVE) {
+            log.warn("Edit rejected | Movie inactive reviewId={}", reviewId);
+            throw new MovieInactiveException("Movie is not active");
+        }
+
+        if (!review.getUserId().equals(userId)){
+            throw new UnauthorizedActionException("You cannot modify this review");
+        }
+
+        review.setUsername(dto.getUsername());
+        review.setComment(dto.getComment());
+        review.setRating(dto.getRating());
+
+        MovieReview savedReview = movieReviewRepo.save(review);
+
+        log.info("Review updated | reviewId={}", reviewId);
+
+        return MovieReviewDto.builder()
+                .id(savedReview.getId())
+                .username(savedReview.getUsername())
+                .rating(savedReview.getRating())
+                .comment(savedReview.getComment())
+                .createdAt(savedReview.getCreatedAt())
+                .build();
+
     }
 }

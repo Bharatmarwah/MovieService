@@ -32,6 +32,10 @@ public class Seat {
     @JoinColumn(name = "seat_category_id", nullable = false)
     private SeatCategory seatCategory;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private SeatStatus status = SeatStatus.AVAILABLE;
+
     @ManyToOne
     @JoinColumn(name = "screen_id", nullable = false)
     private Screen screen;

@@ -4,6 +4,7 @@ import in.bm.MovieService.ENTITY.*;
 import in.bm.MovieService.EXCEPTION.ReviewNotFoundException;
 import in.bm.MovieService.EXCEPTION.TheaterInactiveException;
 import in.bm.MovieService.EXCEPTION.TheaterNotFoundException;
+import in.bm.MovieService.EXCEPTION.UnauthorizedActionException;
 import in.bm.MovieService.REPO.TheaterRepo;
 import in.bm.MovieService.REPO.TheaterReviewRepo;
 import in.bm.MovieService.RequestDTO.TheaterRequestDto;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.time.LocalTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,7 +31,9 @@ public class TheaterService {
     private static final int EARTH_RADIUS_KM = 6371;
     private final TheaterRepo theaterRepo;
     private final TheaterReviewRepo theaterReviewRepo;
+    private final ShowService showService;
 
+    @Transactional
     public TheaterInfoDTO addTheater(TheaterRequestDto dto) {
 
         log.info("Add theater request | brand={} branchName={}",
@@ -63,6 +66,7 @@ public class TheaterService {
         return mapToInfoDTO(saved);
     }
 
+    @Transactional
     public TheaterInfoDTO updateTheater(String theaterCode, TheaterRequestDto dto) {
 
         log.info("Update theater request | theaterCode={}", theaterCode);
@@ -98,6 +102,7 @@ public class TheaterService {
         return mapToInfoDTO(theater);
     }
 
+    @Transactional
     public TheaterStatusDTO activate(String theaterCode) {
 
         log.info("Activate theater request | theaterCode={}", theaterCode);
@@ -124,6 +129,7 @@ public class TheaterService {
                 .build();
     }
 
+    @Transactional
     public TheaterStatusDTO deactivate(String theaterCode) {
 
         log.info("Deactivate theater request | theaterCode={}", theaterCode);
@@ -151,6 +157,7 @@ public class TheaterService {
                 .build();
     }
 
+    @Transactional
     public TheaterDetailsResponseDTO getTheaterDetailsById(String theaterCode) {
 
         log.info("Fetch theater details request | theaterCode={}", theaterCode);
@@ -183,7 +190,8 @@ public class TheaterService {
                 .build();
     }
 
-    public TheaterReviewResponseDTO addReview(String theaterCode, TheaterReviewRequestDTO dto) {
+    @Transactional
+    public TheaterReviewResponseDTO addReview(String theaterCode, TheaterReviewRequestDTO dto, String userId) {
 
         log.info("Add review request | theaterCode={} user={}",
                 theaterCode, dto.getUsername());
@@ -200,6 +208,7 @@ public class TheaterService {
         }
 
         TheaterReview review = new TheaterReview();
+        review.setUserId(userId);
         review.setUsername(dto.getUsername());
         review.setComment(dto.getComment());
         review.setRating(dto.getRating());
@@ -221,6 +230,7 @@ public class TheaterService {
                 .build();
     }
 
+    @Transactional
     public TheaterResponseDTO getTheaterById(String theaterCode, double latitude, double longitude) {
 
         log.info("Fetch theater request | theaterCode={}", theaterCode);
@@ -254,7 +264,8 @@ public class TheaterService {
                 .build();
     }
 
-    public TheaterReviewResponseDTO editReview(long reviewId, TheaterReviewRequestDTO dto) {
+    @Transactional
+    public TheaterReviewResponseDTO editReview(long reviewId, TheaterReviewRequestDTO dto,String userId) {
 
         log.info("Edit review request | reviewId={}", reviewId);
 
@@ -267,6 +278,10 @@ public class TheaterService {
         if (review.getTheater().getStatus() != TheaterStatus.ACTIVE) {
             log.warn("Edit rejected | theater inactive reviewId={}", reviewId);
             throw new TheaterInactiveException("Theater is not active");
+        }
+
+        if (!review.getUserId().equals(userId)){
+            throw new UnauthorizedActionException("Invalid user");
         }
 
         review.setUsername(dto.getUsername());
@@ -301,6 +316,7 @@ public class TheaterService {
         log.warn("Review deleted | reviewId={}", reviewID);
     }
 
+    @Transactional
     public List<TheaterReviewResponseDTO> getAllReviews(String theaterCode) {
 
         log.info("Fetch all reviews request");
@@ -376,6 +392,7 @@ public class TheaterService {
                 Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 10.0) / 10.0;
     }
 
+    @Transactional
     public TheaterPageResponseDTO getTheaterByStatus(TheaterStatus status, int page, int size) {
 
         log.info("Fetch theaters by status | status={} page={} size={}",
@@ -403,10 +420,11 @@ public class TheaterService {
                 .build();
     }
 
+    @Transactional
     public TheaterFilterPageResponseDTO searchFilter(
             String movieCode,
             String city,
-            LocalTime time,
+            LocalDate date,
             Double seatPrice,
             int page,
             int size,
@@ -420,7 +438,7 @@ public class TheaterService {
                 theaterRepo.filter(
                         city,
                         movieCode,
-                        time,
+                        date,
                         seatPrice,
                         TheaterStatus.ACTIVE,
                         ScreenLifeCycle.ACTIVE,
@@ -439,6 +457,10 @@ public class TheaterService {
                                     theater.getLongitude()
                             );
 
+                          List<ShowTimeResponseDTO> shows =  showService
+                                  .getShowsForTheater(movieCode
+                                          ,theater.getTheatreCode()
+                                          ,date);
                             return TheaterResponseDTO.builder()
                                     .theaterCode(theater.getTheatreCode())
                                     .brand(theater.getBrand())
@@ -447,6 +469,7 @@ public class TheaterService {
                                     .avgRating(theater.getAvgRating())
                                     .allowsCancellation(theater.isAllowsCancellation())
                                     .distanceKm(distanceKm)
+                                    .showTimeResponse(shows)
                                     .build();
                         })
                         .toList();
@@ -462,4 +485,12 @@ public class TheaterService {
                 .build();
     }
 
+    @Transactional
+    public void deleteReviewByUser(String userId, Long reviewId) {
+        TheaterReview review = theaterReviewRepo.findById(reviewId).orElseThrow(()->new ReviewNotFoundException("Review not found"));
+        if(!review.getUserId().equals(userId)){
+            throw new UnauthorizedActionException("Invalid user");
+        }
+        theaterReviewRepo.delete(review);
+    }
 }

@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 public interface TheaterRepo extends JpaRepository<Theater, String> {
@@ -25,7 +26,7 @@ public interface TheaterRepo extends JpaRepository<Theater, String> {
             JOIN s.seatCategories sc
             WHERE t.city = :city
             AND (m.movieCode = :movieCode)
-            AND (:time IS NULL OR sh.showTime >= :time)
+            AND (:date IS NULL OR sh.showDate >= :date)
             AND (:seatPrice IS NULL OR sc.price <= :seatPrice)
             AND (:status IS NULL OR t.status = :status)
             AND (:lifeCycle IS NULL OR s.screenLifeCycle =:lifeCycle)
@@ -34,7 +35,7 @@ public interface TheaterRepo extends JpaRepository<Theater, String> {
     Page<Theater> filter(
             @Param("city") String city,
             @Param("movieCode") String movieCode,
-            @Param("time") LocalTime time,
+            @Param("date") LocalDate date,
             @Param("seatPrice") Double seatPrice,
             @Param("status") TheaterStatus status,
             @Param("lifeCycle") ScreenLifeCycle lifeCycle,

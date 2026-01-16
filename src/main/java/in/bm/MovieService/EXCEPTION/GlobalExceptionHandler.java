@@ -177,4 +177,16 @@ public class GlobalExceptionHandler {
 
     }
 
+    @ExceptionHandler(UnauthorizedActionException.class)
+    public ResponseEntity<?> handleUnauthorized(UnauthorizedActionException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                Map.of(
+                        "error", "FORBIDDEN",
+                        "message", ex.getMessage(),
+                        "timestamp", LocalDateTime.now()
+                )
+        );
+    }
+
+
 }

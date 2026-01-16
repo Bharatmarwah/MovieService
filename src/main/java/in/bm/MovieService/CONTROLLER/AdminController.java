@@ -248,7 +248,6 @@ public class AdminController {
         theaterService.deleteReview(reviewId);
         return ResponseEntity.noContent().build();
     }
-    // todo delete only user review by user
 
     //theaters/{theaterCode}/deactivate
     @PatchMapping("/theaters/{theaterCode}/deactivate")
