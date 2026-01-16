@@ -234,21 +234,17 @@ public class ShowService {
         Show show = showRepo.findById(showId)
                 .orElseThrow(() ->
                         new ShowNotFoundException("Show not found"));
-
         Screen screen = show.getScreen();
         if (screen == null) {
             throw new ScreenNotFoundException("Screen not found");
         }
-
         if (screen.getScreenLifeCycle() != ScreenLifeCycle.ACTIVE) {
             throw new ScreenInActiveException("Screen is inactive");
         }
-
         List<Seat> seatList = screen.getSeats();
         if (seatList == null || seatList.isEmpty()) {
             throw new SeatNotFoundException("No seats configured for screen");
         }
-
         List<SeatsResponseDTO> seats =
                 seatList.stream()
                         .filter(seat -> seat.getLifeCycle() == SeatLifecycle.ACTIVE)
@@ -263,7 +259,6 @@ public class ShowService {
                                 .build()
                         )
                         .toList();
-
         return ShowSeatsResponse.builder()
                 .showId(show.getShowId())
                 .screenName(screen.getScreenName())

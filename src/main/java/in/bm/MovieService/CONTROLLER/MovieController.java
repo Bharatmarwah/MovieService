@@ -2,7 +2,6 @@ package in.bm.MovieService.CONTROLLER;
 
 
 import in.bm.MovieService.RequestDTO.MovieReviewRequestDTO;
-import in.bm.MovieService.RequestDTO.TheaterReviewRequestDTO;
 import in.bm.MovieService.ResponseDTO.*;
 import in.bm.MovieService.SERVICE.MovieService;
 import jakarta.validation.Valid;
@@ -74,9 +73,4 @@ public class MovieController {
         movieService.deleteReviewUser(userId, reviewId);
         return ResponseEntity.noContent().build();
     }
-
-
-
-
-
 }
