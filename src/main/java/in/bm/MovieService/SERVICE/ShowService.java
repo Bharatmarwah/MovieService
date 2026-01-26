@@ -17,10 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
 
 
 @Service
@@ -32,6 +29,9 @@ public class ShowService {
     private final ScreenRepo screenRepo;
     private final MovieRepo movieRepo;
 
+
+    // Todo : add showSeatId here
+    // where every seats have their own unique number
     @Transactional
     public ShowResponseDTO addShow(ShowRequestDTO dto) {
 
