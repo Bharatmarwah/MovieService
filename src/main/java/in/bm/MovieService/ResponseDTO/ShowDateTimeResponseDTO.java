@@ -12,6 +12,7 @@ import java.time.LocalTime;
 public class ShowDateTimeResponseDTO {
 
     public long showId;
+
     private DayOfWeek dayOfWeek;
 
     private LocalDate showDate;

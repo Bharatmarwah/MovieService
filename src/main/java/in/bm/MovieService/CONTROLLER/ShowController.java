@@ -20,10 +20,12 @@ public class ShowController {
     private final ShowService showService;
 
     @GetMapping("/by-movie/{movieCode}")
-    public ResponseEntity<List<ShowDateTimeResponseDTO>> getShowsByMovieCode(@PathVariable String movieCode){
-        return ResponseEntity.status(HttpStatus.OK).body(showService.getShowsByMovieCode(movieCode));
+    public ResponseEntity<List<ShowDateTimeResponseDTO>> getShowsByMovieCode(@PathVariable String movieCode, @RequestParam String city){
+        return ResponseEntity.status(HttpStatus.OK).body(showService.getShowsByMovieCode(movieCode, city));
     }
 
+
+    // /{showId}/seats (show id is being fetched by the theater filter)
     @GetMapping("{showId}/seats")
     public ResponseEntity<ShowSeatsResponse> seatsByShowId(@PathVariable Long showId){
         return ResponseEntity.status(HttpStatus.OK).body(showService.seatsByShowId(showId));

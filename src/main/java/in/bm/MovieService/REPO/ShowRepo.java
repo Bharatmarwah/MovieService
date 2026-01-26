@@ -20,16 +20,19 @@ public interface ShowRepo extends JpaRepository<Show, Long> {
     Page<Show> findALlShowWithActiveMovies(PageRequest pageRequest, @Param("status") MovieStatus movieStatus);
 
     @Transactional(readOnly = true)
-    @Query("""
-                SELECT sh
-                FROM Show sh
-                JOIN sh.movie m
-                WHERE m.movieCode = :movieCode
-                  AND m.status = :movieStatus
+    @Query(""" 
+            SELECT s
+            FROM Show s
+            JOIN s.screen sc
+            JOIN sc.theater t
+            WHERE s.movie.movieCode = :movieCode
+            AND s.movie.status = :movieStatus
+            AND t.city = :city
             """)
     List<Show> findShowsByMovieCode(
             @Param("movieCode") String movieCode,
-            @Param("movieStatus") MovieStatus movieStatus
+            @Param("movieStatus") MovieStatus movieStatus,
+            @Param("city") String city
     );
 
     @Transactional(readOnly = true)

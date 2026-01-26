@@ -201,8 +201,8 @@ public class ShowService {
                 build();
     }
 
-    public List<ShowDateTimeResponseDTO> getShowsByMovieCode(String movieCode) {
-        List<Show> shows = showRepo.findShowsByMovieCode(movieCode, MovieStatus.ACTIVE);
+    public List<ShowDateTimeResponseDTO> getShowsByMovieCode(String movieCode, String city) {
+        List<Show> shows = showRepo.findShowsByMovieCode(movieCode, MovieStatus.ACTIVE, city);
         return shows.
                 stream().
                 map(show ->
