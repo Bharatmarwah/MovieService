@@ -22,6 +22,7 @@ public class SeatsResponseDTO {
 
 
     private long seatId;
+    private long showSeatId;
     private String seatNumber;
     private ViewType view;
     private SeatStatus status;

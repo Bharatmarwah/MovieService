@@ -6,6 +6,7 @@ import in.bm.MovieService.ENTITY.Theater;
 import in.bm.MovieService.ENTITY.TheaterStatus;
 import in.bm.MovieService.EXCEPTION.*;
 import in.bm.MovieService.REPO.ScreenRepo;
+import in.bm.MovieService.REPO.ShowRepo;
 import in.bm.MovieService.REPO.TheaterRepo;
 import in.bm.MovieService.RequestDTO.ScreenRequestDTO;
 import in.bm.MovieService.ResponseDTO.ScreenResponseDTO;
@@ -23,6 +24,8 @@ public class ScreenService {
 
     private final ScreenRepo screenRepo;
     private final TheaterRepo theaterRepo;
+    private final ShowRepo showRepo;
+
 
 
     @Transactional
@@ -159,6 +162,15 @@ public class ScreenService {
             throw new ScreenInActiveException("Screen already inactive");
         }
 
+        boolean hasShows = showRepo.existsByScreen_ScreenId(screenId);
+
+        if (hasShows) {
+            throw new IllegalStateException(
+                    "Screen cannot be deactivated because shows exist on it"
+            );
+        }
+
+
         screen.setScreenLifeCycle(ScreenLifeCycle.INACTIVE);
         screenRepo.save(screen);
 
@@ -187,6 +199,15 @@ public class ScreenService {
                     screenId, screen.getScreenLifeCycle());
             throw new ScreenInActiveException("Screen must be inactive before retiring");
         }
+
+        boolean hasShows = showRepo.existsByScreen_ScreenId(screenId);
+
+        if (hasShows) {
+            throw new IllegalStateException(
+                    "Screen cannot be retired because shows exist on it"
+            );
+        }
+
 
         screen.setScreenLifeCycle(ScreenLifeCycle.RETIRED);
         screenRepo.save(screen);

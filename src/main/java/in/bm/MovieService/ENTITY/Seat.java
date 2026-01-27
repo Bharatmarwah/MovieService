@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 
 @Entity
 @Table(name = "seats",uniqueConstraints = @UniqueConstraint(columnNames = {"screen_id","seat_number"}))
@@ -32,13 +34,11 @@ public class Seat {
     @JoinColumn(name = "seat_category_id", nullable = false)
     private SeatCategory seatCategory;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private SeatStatus status = SeatStatus.AVAILABLE;
-
     @ManyToOne
     @JoinColumn(name = "screen_id", nullable = false)
     private Screen screen;
 
+    @OneToMany(mappedBy = "seat",cascade = CascadeType.PERSIST, orphanRemoval = true)
+    private List<ShowSeat> showSeats;
 
 }

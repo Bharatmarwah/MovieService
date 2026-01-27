@@ -7,6 +7,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 
 @Entity
@@ -47,6 +48,9 @@ public class Show {
     private Movie movie;
 
     private String meridiem;
+
+    @OneToMany(mappedBy = "show", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    private List<ShowSeat> showSeats;
 
     @PrePersist// runs before inserting
     @PreUpdate // runs before every update

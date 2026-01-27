@@ -5,6 +5,7 @@ import in.bm.MovieService.EXCEPTION.*;
 import in.bm.MovieService.REPO.ScreenRepo;
 import in.bm.MovieService.REPO.SeatCategoryRepo;
 import in.bm.MovieService.REPO.SeatRepo;
+import in.bm.MovieService.REPO.ShowSeatRepo;
 import in.bm.MovieService.RequestDTO.*;
 import in.bm.MovieService.ResponseDTO.*;
 import jakarta.validation.Valid;
@@ -27,6 +28,7 @@ public class SeatService {
     private final SeatRepo seatRepo;
     private final ScreenRepo screenRepo;
     private final SeatCategoryRepo seatCategoryRepo;
+    private final ShowSeatRepo showSeatRepo;
 
 
     @Transactional
@@ -202,7 +204,17 @@ public class SeatService {
             throw new IllegalStateException("Seat is already inactive");
         }
 
+        boolean usedInAnyShow =
+                showSeatRepo.existsBySeat_SeatId(seatId);
+
+        if (usedInAnyShow) {
+            throw new IllegalStateException(
+                    "Seat cannot be deactivated because it is used in existing shows"
+            );
+        }
+
         seat.setLifeCycle(SeatLifecycle.INACTIVE);
+
         Seat updatedSeat = seatRepo.save(seat);
 
         log.info(
@@ -322,6 +334,15 @@ public class SeatService {
         if (seat.getLifeCycle() != SeatLifecycle.INACTIVE) {
             log.warn("Delete blocked for active seat | seatId={}", seatId);
             throw new SeatActiveException("Active seat cannot be removed");
+        }
+
+        boolean usedInAnyShow =
+                showSeatRepo.existsBySeat_SeatId(seatId);
+
+        if (usedInAnyShow) {
+            throw new IllegalStateException(
+                    "Seat cannot be deactivated because it is used in existing shows"
+            );
         }
 
         seatRepo.delete(seat);

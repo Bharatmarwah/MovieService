@@ -41,4 +41,6 @@ public interface ShowRepo extends JpaRepository<Show, Long> {
                              String movieCode,
                              @Param("theaterCode") String theatreCode,
                              @Param("date") LocalDate date);
+
+    boolean existsByScreen_ScreenId(Long screenId);
 }
