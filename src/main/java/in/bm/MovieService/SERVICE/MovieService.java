@@ -11,6 +11,10 @@ import in.bm.MovieService.ResponseDTO.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -31,6 +35,10 @@ public class MovieService {
     private final MovieDetailsRepo movieDetailsRepo;
     private final MovieReviewRepo movieReviewRepo;
 
+    @Cacheable(
+            cacheNames = "movies",
+            key = "'PAGE:' + #page + ':' + #size"
+    )
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public MoviePageResponseDTO getMovies(int page, int size) {
 
@@ -65,6 +73,7 @@ public class MovieService {
     }
 
 
+    @Cacheable(cacheNames = "movies",key = "#movieCode")
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public MovieDetailsResponseDTO getMovieDetails(String movieCode) {
 
@@ -121,7 +130,7 @@ public class MovieService {
                 movieRequestDTO.getLanguage());
 
         Movie movie = new Movie();
-        movie.setMovieCode(generateCode("MV"));
+        movie.setMovieCode(generateCode());
         movie.setMovieName(movieRequestDTO.getMovieName());
         movie.setDuration(movieRequestDTO.getDuration());
         movie.setMovieAvatar(movieRequestDTO.getMovieAvatar());
@@ -160,6 +169,7 @@ public class MovieService {
                 .build();
     }
 
+    @Cacheable(cacheNames = "movies",key = "#movieCode")
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public MovieResponseDTO getMovieById(String movieCode) {
 
@@ -227,6 +237,7 @@ public class MovieService {
                 .build();
     }
 
+    @CacheEvict(cacheNames = "movies",allEntries = true)
     @org.springframework.transaction.annotation.Transactional
     public MovieStatusDTO activate(String movieCode) {
 
@@ -251,6 +262,10 @@ public class MovieService {
                 .build();
     }
 
+    @Caching(
+            put = @CachePut(cacheNames = "movies", key = "#result.movieCode()"),
+            evict = @CacheEvict(cacheNames = "movies", allEntries = true)
+    )
     @org.springframework.transaction.annotation.Transactional
     public MovieInfoDTO updateMovie(String movieCode, MovieRequestDTO movieRequestDTO) {
 
@@ -305,6 +320,7 @@ public class MovieService {
                 .build();
     }
 
+    @CacheEvict(cacheNames = "movies",allEntries = true)
     @org.springframework.transaction.annotation.Transactional
     public MovieStatusDTO deactivate(String movieCode) {
 
@@ -328,6 +344,7 @@ public class MovieService {
                 .message("Movie is no longer active")
                 .build();
     }
+
 
 
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
@@ -362,8 +379,8 @@ public class MovieService {
                 .build();
     }
 
-    private String generateCode(String prefix) {
-        return prefix + UUID.randomUUID().toString().substring(0, 8);
+    private String generateCode() {
+        return "MV" + UUID.randomUUID().toString().substring(0, 8);
     }
 
     @org.springframework.transaction.annotation.Transactional

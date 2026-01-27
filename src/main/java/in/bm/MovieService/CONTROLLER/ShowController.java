@@ -24,7 +24,6 @@ public class ShowController {
         return ResponseEntity.status(HttpStatus.OK).body(showService.getShowsByMovieCode(movieCode, city));
     }
 
-
     // /{showId}/seats (show id is being fetched by the theater filter)
     @GetMapping("{showId}/seats")
     public ResponseEntity<ShowSeatsResponse> seatsByShowId(@PathVariable Long showId){

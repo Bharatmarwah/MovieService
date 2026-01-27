@@ -1,16 +1,21 @@
 package in.bm.MovieService.CONFIG;
 
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
+@EnableCaching
 public class RedisConfig {
 
     @Bean
@@ -26,9 +31,15 @@ public class RedisConfig {
                                         .fromSerializer(new StringRedisSerializer()))
                         .serializeValuesWith(
                                 RedisSerializationContext.SerializationPair
-                                        .fromSerializer(new ));
+                                        .fromSerializer(new GenericJackson2JsonRedisSerializer()));
+
+        Map<String , RedisCacheConfiguration> cacheConfig = new HashMap<>();
+        cacheConfig.put("movies",config.entryTtl(Duration.ofDays(7)));
+
 
         return RedisCacheManager.builder(connectionFactory)
+                .withInitialCacheConfigurations(cacheConfig)
                 .cacheDefaults(config)
                 .build();
     }
+}
