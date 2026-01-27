@@ -12,7 +12,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
@@ -73,7 +72,7 @@ public class MovieService {
     }
 
 
-    @Cacheable(cacheNames = "movies",key = "#movieCode")
+    @Cacheable(cacheNames = "movieDetails",key = "#movieCode")
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public MovieDetailsResponseDTO getMovieDetails(String movieCode) {
 
@@ -122,6 +121,10 @@ public class MovieService {
     }
 
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "movies", allEntries = true),
+            @CacheEvict(cacheNames = "movieDetails", allEntries = true)
+    })
     @Transactional
     public MovieInfoDTO addMovie(MovieRequestDTO movieRequestDTO) {
 
@@ -237,7 +240,10 @@ public class MovieService {
                 .build();
     }
 
-    @CacheEvict(cacheNames = "movies",allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "movies", allEntries = true),
+            @CacheEvict(cacheNames = "movieDetails", allEntries = true)
+    })
     @org.springframework.transaction.annotation.Transactional
     public MovieStatusDTO activate(String movieCode) {
 
@@ -262,10 +268,10 @@ public class MovieService {
                 .build();
     }
 
-    @Caching(
-            put = @CachePut(cacheNames = "movies", key = "#result.movieCode()"),
-            evict = @CacheEvict(cacheNames = "movies", allEntries = true)
-    )
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "movies", allEntries = true),
+            @CacheEvict(cacheNames = "movieDetails", key = "#movieCode")
+    })
     @org.springframework.transaction.annotation.Transactional
     public MovieInfoDTO updateMovie(String movieCode, MovieRequestDTO movieRequestDTO) {
 
@@ -320,7 +326,10 @@ public class MovieService {
                 .build();
     }
 
-    @CacheEvict(cacheNames = "movies",allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "movies", allEntries = true),
+            @CacheEvict(cacheNames = "movieDetails", allEntries = true)
+    })
     @org.springframework.transaction.annotation.Transactional
     public MovieStatusDTO deactivate(String movieCode) {
 

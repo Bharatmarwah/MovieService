@@ -34,7 +34,11 @@ public class RedisConfig {
                                         .fromSerializer(new GenericJackson2JsonRedisSerializer()));
 
         Map<String , RedisCacheConfiguration> cacheConfig = new HashMap<>();
+
         cacheConfig.put("movies",config.entryTtl(Duration.ofDays(7)));
+        cacheConfig.put("movieDetails",config.entryTtl(Duration.ofDays(7)));
+
+        cacheConfig.put("shows",config.entryTtl(Duration.ofDays(1)));
 
 
         return RedisCacheManager.builder(connectionFactory)
