@@ -9,6 +9,7 @@ import in.bm.MovieService.REPO.ShowSeatRepo;
 import in.bm.MovieService.RequestDTO.*;
 import in.bm.MovieService.ResponseDTO.*;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -32,7 +33,7 @@ public class SeatService {
 
 
     @Transactional
-    public SeatBulkResponseDTO addSeats(@org.jetbrains.annotations.NotNull AddSeatRequestDTO dto) {
+    public SeatBulkResponseDTO addSeats(@NotNull AddSeatRequestDTO dto) {
 
         log.info(
                 "Add seats request | screenId={} seatCategoryId={} rows {}-{} seatsPerRow={}",

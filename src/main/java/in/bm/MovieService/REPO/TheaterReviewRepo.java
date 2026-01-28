@@ -2,7 +2,6 @@ package in.bm.MovieService.REPO;
 
 
 import in.bm.MovieService.ENTITY.TheaterReview;
-import org.springframework.data.domain.SearchResults;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

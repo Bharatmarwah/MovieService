@@ -71,7 +71,6 @@ public class MovieService {
                 .build();
     }
 
-
     @Cacheable(cacheNames = "movieDetails",key = "#movieCode")
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public MovieDetailsResponseDTO getMovieDetails(String movieCode) {
@@ -119,7 +118,6 @@ public class MovieService {
                 .synopsis(movieDetails.getSynopsis())
                 .build();
     }
-
 
     @Caching(evict = {
             @CacheEvict(cacheNames = "movies", allEntries = true),
