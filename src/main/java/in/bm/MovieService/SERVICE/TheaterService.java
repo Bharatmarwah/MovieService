@@ -12,6 +12,9 @@ import in.bm.MovieService.RequestDTO.TheaterReviewRequestDTO;
 import in.bm.MovieService.ResponseDTO.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -33,6 +36,10 @@ public class TheaterService {
     private final TheaterReviewRepo theaterReviewRepo;
     private final ShowService showService;
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "theaters", allEntries = true),
+            @CacheEvict(cacheNames = "theaterDetails", allEntries = true)
+    })
     @Transactional
     public TheaterInfoDTO addTheater(TheaterRequestDto dto) {
 
@@ -66,6 +73,10 @@ public class TheaterService {
         return mapToInfoDTO(saved);
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "theaters", allEntries = true),
+            @CacheEvict(cacheNames = "theaterDetails", key = "#theaterCode")
+    })
     @Transactional
     public TheaterInfoDTO updateTheater(String theaterCode, TheaterRequestDto dto) {
 
@@ -102,6 +113,10 @@ public class TheaterService {
         return mapToInfoDTO(theater);
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "theaters", allEntries = true),
+            @CacheEvict(cacheNames = "theaterDetails", allEntries = true)
+    })
     @Transactional
     public TheaterStatusDTO activate(String theaterCode) {
 
@@ -129,6 +144,10 @@ public class TheaterService {
                 .build();
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "theaters", allEntries = true),
+            @CacheEvict(cacheNames = "theaterDetails", allEntries = true)
+    })
     @Transactional
     public TheaterStatusDTO deactivate(String theaterCode) {
 
@@ -157,6 +176,7 @@ public class TheaterService {
                 .build();
     }
 
+    @Cacheable(cacheNames = "theaterDetails",key = "#theaterCode")
     @Transactional
     public TheaterDetailsResponseDTO getTheaterDetailsById(String theaterCode) {
 

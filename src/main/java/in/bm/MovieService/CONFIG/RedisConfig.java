@@ -24,7 +24,7 @@ public class RedisConfig {
 
         RedisCacheConfiguration config =
                 RedisCacheConfiguration.defaultCacheConfig()
-                        .entryTtl(Duration.ofMinutes(10))
+                        .entryTtl(Duration.ofMinutes(5))
                         .disableCachingNullValues()
                         .serializeKeysWith(
                                 RedisSerializationContext.SerializationPair
@@ -33,13 +33,15 @@ public class RedisConfig {
                                 RedisSerializationContext.SerializationPair
                                         .fromSerializer(new GenericJackson2JsonRedisSerializer()));
 
-        Map<String , RedisCacheConfiguration> cacheConfig = new HashMap<>();
+        Map<String, RedisCacheConfiguration> cacheConfig = new HashMap<>();
 
-        cacheConfig.put("movies",config.entryTtl(Duration.ofDays(7)));
-        cacheConfig.put("movieDetails",config.entryTtl(Duration.ofDays(7)));
+        cacheConfig.put("movies", config.entryTtl(Duration.ofHours(24)));
+        cacheConfig.put("movieDetails", config.entryTtl(Duration.ofHours(48)));
 
-        cacheConfig.put("shows",config.entryTtl(Duration.ofDays(1)));
+        cacheConfig.put("shows", config.entryTtl(Duration.ofDays(1)));
 
+        cacheConfig.put("theaters", config.entryTtl(Duration.ofHours(12)));
+        cacheConfig.put("theaterDetails", config.entryTtl(Duration.ofDays(3)));
 
         return RedisCacheManager.builder(connectionFactory)
                 .withInitialCacheConfigurations(cacheConfig)

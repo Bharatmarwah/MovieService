@@ -71,7 +71,6 @@ public class ScreenService {
             @Valid ScreenRequestDTO dto,
             Long screenId
     ) {
-
         log.info("Update screen request | screenId={} newName={} newTheaterCode={}",
                 screenId, dto.getScreenName(), dto.getTheaterCode());
 
@@ -207,8 +206,6 @@ public class ScreenService {
                     "Screen cannot be retired because shows exist on it"
             );
         }
-
-
         screen.setScreenLifeCycle(ScreenLifeCycle.RETIRED);
         screenRepo.save(screen);
 
