@@ -31,6 +31,7 @@
         private final MovieRepo movieRepo;
         private final ShowSeatRepo showSeatRepo;
 
+        // adding show with dto {screenId , movieCode , time and date}
         @CacheEvict(cacheNames = "shows", allEntries = true)
         @Transactional
         public ShowResponseDTO addShow(ShowRequestDTO dto) {
@@ -57,6 +58,8 @@
 
             Show savedShow = showRepo.save(show);
 
+
+            // from the screen id we are fetching seats as per screen and adding the seats in the showSeat one by one
             List<ShowSeat> showSeats =
                     screen.getSeats().stream()
                             .filter(seat -> seat.getLifeCycle() == SeatLifecycle.ACTIVE)
@@ -86,6 +89,8 @@
                     .build();
         }
 
+
+        // we are updating the show but not the showSeats because seat status or etc screen responsibility
         @CacheEvict(cacheNames = "shows",allEntries = true)
         @Transactional
         public ShowResponseDTO updateShow(@Valid ShowRequestDTO dto, Long showId) {
@@ -121,6 +126,8 @@
                     .build();
         }
 
+
+        // deleting the show
         @CacheEvict(cacheNames = "shows", allEntries = true)
         @Transactional
         public void deleteShow(Long showId) {
@@ -130,6 +137,7 @@
         }
 
 
+        // getting all the show by page and size using paginating
         @Cacheable(
                 cacheNames = "shows",
                 key = "'PAGE:' + #page + ':' + #size"
@@ -165,6 +173,7 @@
                     .build();
         }
 
+        // getting the show by id
         @Cacheable(cacheNames = "shows",key = "#showId")
         public ShowResponseDTO getShowById(Long showId) {
 
@@ -187,10 +196,11 @@
         }
 
 
+        // getting shows by movieCode and city
         @Cacheable(
                 cacheNames = "shows",
                 key = "'MOVIE:' + #movieCode +':'+ #city")
-        public List<ShowDateTimeResponseDTO> getShowsByMovieCode(String movieCode, String city) {
+        public List<ShowDateTimeResponseDTO> getShowsByMovieAndCity(String movieCode, String city) {
 
             return showRepo.findShowsByMovieCode(movieCode, MovieStatus.ACTIVE, city)
                     .stream()
@@ -204,6 +214,9 @@
                     .toList();
         }
 
+
+        //getting showTime in theater columns as time like PVR nsp
+        //                                                 11:00 PM
         @Cacheable(
                 cacheNames = "shows",
                 key = "'THEATER:' + #theatreCode + ':' + #date"
@@ -220,6 +233,7 @@
                     .toList();
         }
 
+        // theater filter will return the showId from which seats will be fetched
         @Transactional(readOnly = true)
         public ShowSeatsResponse seatsByShowId(Long showId) {
 

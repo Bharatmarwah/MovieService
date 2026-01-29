@@ -21,7 +21,7 @@ public class ShowController {
 
     @GetMapping("/by-movie/{movieCode}")
     public ResponseEntity<List<ShowDateTimeResponseDTO>> getShowsByMovieCode(@PathVariable String movieCode, @RequestParam String city){
-        return ResponseEntity.status(HttpStatus.OK).body(showService.getShowsByMovieCode(movieCode, city));
+        return ResponseEntity.status(HttpStatus.OK).body(showService.getShowsByMovieAndCity(movieCode, city));
     }
 
     // /{showId}/seats (show id is being fetched by the theater filter)
