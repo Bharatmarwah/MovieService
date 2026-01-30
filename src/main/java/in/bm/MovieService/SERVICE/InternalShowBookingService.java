@@ -10,6 +10,7 @@ import in.bm.MovieService.ResponseDTO.InternalShowResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,13 +22,12 @@ public class InternalShowBookingService {
     private final ShowRepo showRepo;
     private final ShowSeatRepo showSeatRepo;
 
+    @Transactional
     public InternalShowResponse validateShowForBooking(
             @Valid InternalShowRequestDTO request) {
 
-
         Show show = showRepo.findById(request.getShowId())
                 .orElseThrow(() -> new ShowNotFoundException("Show not found"));
-
 
         Movie movie = movieRepo.findById(show.getMovie().getMovieCode())
                 .orElseThrow(() -> new MovieNotFoundException("Movie not found"));
@@ -37,29 +37,47 @@ public class InternalShowBookingService {
         }
 
         List<ShowSeat> showSeats =
-                showSeatRepo.findAllById(request.getShowSeatIds());
+                showSeatRepo.findByIdsForUpdate(request.getShowSeatIds());
 
         if (showSeats.size() != request.getShowSeatIds().size()) {
-            throw new SeatNotFoundException("Invalid seat id(s)");
+            throw new SeatNotFoundException("Invalid seat ids");
         }
 
-        double totalAmount = 0;
+        double baseAmount = 0;
 
         for (ShowSeat seat : showSeats) {
+
             if (!seat.getShow().getShowId().equals(show.getShowId())) {
                 throw new InvalidSeatException("Seat does not belong to show");
+            }
+
+            if (seat.getSeatStatus() != SeatStatus.AVAILABLE) {
+                throw new SeatUnavailableException(
+                        "Seat already booked or blocked: " + seat.getShowSeatId());
             }
 
             if (seat.getSeat().getLifeCycle() != SeatLifecycle.ACTIVE) {
                 throw new SeatUnavailableException("Seat inactive");
             }
 
-            totalAmount += seat.getSeat()
+            baseAmount += seat.getSeat()
                     .getSeatCategory()
                     .getPrice();
         }
 
-        // 5️⃣ Build response
+        final double CONVENIENCE_RATE = 0.08;
+        final double MAX_CONVENIENCE_FEE = 50;
+        final double GST_RATE = 0.18;
+
+        double convenienceFee =
+                Math.min(baseAmount * CONVENIENCE_RATE, MAX_CONVENIENCE_FEE);
+
+        double gstAmount =
+                (baseAmount + convenienceFee) * GST_RATE;
+
+        double totalAmount =
+                baseAmount + convenienceFee + gstAmount;
+
         return InternalShowResponse.builder()
                 .movieCode(movie.getMovieCode())
                 .showId(show.getShowId())
@@ -68,11 +86,12 @@ public class InternalShowBookingService {
                                 .map(ShowSeat::getShowSeatId)
                                 .toList()
                 )
+                .baseAmount(baseAmount)
+                .convenienceFee(convenienceFee)
+                .gstAmount(gstAmount)
                 .totalAmount(totalAmount)
                 .build();
     }
-    // implements taxes in total amount
-    // checking showSeats availability
-    // seat active
+
 
 }

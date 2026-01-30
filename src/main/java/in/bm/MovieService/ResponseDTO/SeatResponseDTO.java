@@ -16,6 +16,5 @@ public class SeatResponseDTO {
     private SeatFeature seatFeature;
     private String seatNumber;
     private ViewType viewType;
-    private SeatLifecycle seatLifecycle;
 
 }

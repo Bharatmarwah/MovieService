@@ -150,7 +150,6 @@ public class SeatService {
                         .screenId(seat.getScreen().getScreenId())
                         .seatCategoryId(seat.getSeatCategory().getId())
                         .seatFeature(seat.getSeatFeatures())
-                        .seatLifecycle(seat.getLifeCycle())
                         .viewType(seat.getViewType())
                         .build())
                 .toList();
@@ -195,7 +194,6 @@ public class SeatService {
                 .screenId(seat.getScreen().getScreenId())
                 .seatCategoryId(seat.getSeatCategory().getId())
                 .seatFeature(seat.getSeatFeatures())
-                .seatLifecycle(seat.getLifeCycle())
                 .viewType(seat.getViewType())
                 .build();
     }
@@ -330,7 +328,6 @@ public class SeatService {
                 .seatCategoryId(updatedSeat.getSeatCategory().getId())
                 .seatFeature(updatedSeat.getSeatFeatures())
                 .viewType(updatedSeat.getViewType())
-                .seatLifecycle(updatedSeat.getLifeCycle())
                 .build();
     }
 

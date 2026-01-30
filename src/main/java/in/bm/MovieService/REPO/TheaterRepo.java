@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 public interface TheaterRepo extends JpaRepository<Theater, String> {
     Page<Theater> findAllByStatus(TheaterStatus status, PageRequest pageRequest);
