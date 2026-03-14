@@ -139,17 +139,17 @@ public class MovieService {
         movie.setLanguage(movieRequestDTO.getLanguage());
         movie.setStatus(MovieStatus.PENDING);
 
-        Movie savedMovie = movieRepo.save(movie);
-
         MovieDetails movieDetails = new MovieDetails();
-        movieDetails.setMovie(savedMovie);
+        movieDetails.setMovie(movie);
         movieDetails.setCastAndCrew(movieRequestDTO.getMovieDetailsRequestDTO().getCastAndCrew());
         movieDetails.setSynopsis(movieRequestDTO.getMovieDetailsRequestDTO().getSynopsis());
         movieDetails.setMovieType(movieRequestDTO.getMovieDetailsRequestDTO().getMovieType());
         movieDetails.setPosters(movieRequestDTO.getMovieDetailsRequestDTO().getPosters());
 
-        MovieDetails savedDetails = movieDetailsRepo.save(movieDetails);
-        savedMovie.setMovieDetails(savedDetails);
+        movie.setMovieDetails(movieDetails);
+        movieDetails.setMovie(movie);
+
+        Movie savedMovie = movieRepo.save(movie);
 
         log.info("Movie created | movieCode={} status={}",
                 savedMovie.getMovieCode(), savedMovie.getStatus());
@@ -161,10 +161,10 @@ public class MovieService {
                 .language(savedMovie.getLanguage())
                 .duration(savedMovie.getDuration())
                 .certificate(savedMovie.getCertificate())
-                .castAndCrew(savedDetails.getCastAndCrew())
-                .posters(savedDetails.getPosters())
-                .synopsis(savedDetails.getSynopsis())
-                .movieType(savedDetails.getMovieType())
+                .castAndCrew(movieDetails.getCastAndCrew())
+                .posters(movieDetails.getPosters())
+                .synopsis(movieDetails.getSynopsis())
+                .movieType(movieDetails.getMovieType())
                 .reviews(List.of())
                 .status(savedMovie.getStatus())
                 .build();
@@ -256,7 +256,6 @@ public class MovieService {
         }
 
         movie.setStatus(MovieStatus.ACTIVE);
-        movieRepo.save(movie);
 
         log.info("Movie activated | movieCode={}", movieCode);
 
@@ -342,7 +341,6 @@ public class MovieService {
         }
 
         movie.setStatus(MovieStatus.INACTIVE);
-        movieRepo.save(movie);
 
         log.info("Movie deactivated | movieCode={}", movieCode);
 
@@ -351,8 +349,6 @@ public class MovieService {
                 .message("Movie is no longer active")
                 .build();
     }
-
-
 
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public MoviePageResponseDTO searchMovie(String q, int page, int size) {
@@ -409,7 +405,7 @@ public class MovieService {
     }
 
     @org.springframework.transaction.annotation.Transactional
-    public void deleteReviewUser(String userId, Long reviewId) {
+    public void deleteUserReview(String userId, Long reviewId) {
         MovieReview review = movieReviewRepo.findById(reviewId).orElseThrow(()->new ReviewNotFoundException("Review not found"));
         if(!review.getUserId().equals(userId)){
             throw new UnauthorizedActionException("You cannot modify this review");

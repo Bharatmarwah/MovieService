@@ -24,10 +24,10 @@ public class AdminController {
 
     // ================= MOVIES =================
 
+
     @PostMapping("/movies")
     public ResponseEntity<MovieInfoDTO> addMovies(
             @Valid @RequestBody MovieRequestDTO movieRequestDTO) {
-
         MovieInfoDTO response = movieService.addMovie(movieRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

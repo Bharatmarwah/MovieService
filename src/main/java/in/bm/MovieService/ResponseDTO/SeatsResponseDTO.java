@@ -8,6 +8,7 @@ import in.bm.MovieService.ENTITY.ViewType;
 import lombok.Builder;
 import lombok.Getter;
 @JsonPropertyOrder({
+        "showSeatId",
         "seatId",
         "seatNumber",
         "seatType",
@@ -19,7 +20,6 @@ import lombok.Getter;
 @Builder
 @Getter
 public class SeatsResponseDTO {
-
 
     private long showSeatId;
     private String seatNumber;

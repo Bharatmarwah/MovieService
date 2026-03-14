@@ -29,7 +29,6 @@ public class MovieReview {
     private String comment;
     private Instant createdAt;
 
-
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "movie_details_id")

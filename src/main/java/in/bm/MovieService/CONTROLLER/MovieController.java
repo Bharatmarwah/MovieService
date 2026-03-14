@@ -69,7 +69,7 @@ public class MovieController {
             @RequestHeader("x-user-id") String userId,
             @PathVariable Long reviewId) {
 
-        movieService.deleteReviewUser(userId, reviewId);
+        movieService.deleteUserReview(userId, reviewId);
         return ResponseEntity.noContent().build();
     }
 }
