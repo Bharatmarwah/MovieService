@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 
 @Repository
 public interface MovieRepo extends JpaRepository<Movie, String> {
@@ -32,5 +34,8 @@ public interface MovieRepo extends JpaRepository<Movie, String> {
     );
 
     Page<Movie> findByStatus(MovieStatus movieStatus, Pageable pageable);
+
+    @Query(value = "SELECT * FROM movies WHERE movie_name LIKE %:name% LIMIT 3", nativeQuery = true)
+    List<Movie> findMovieForAgentByName(String name);
 }
 

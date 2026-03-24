@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -71,7 +73,7 @@ public class MovieService {
                 .build();
     }
 
-    @Cacheable(cacheNames = "movieDetails",key = "#movieCode")
+    @Cacheable(cacheNames = "movieDetails", key = "#movieCode")
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public MovieDetailsResponseDTO getMovieDetails(String movieCode) {
 
@@ -170,7 +172,7 @@ public class MovieService {
                 .build();
     }
 
-    @Cacheable(cacheNames = "movies",key = "#movieCode")
+    @Cacheable(cacheNames = "movies", key = "#movieCode")
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public MovieResponseDTO getMovieById(String movieCode) {
 
@@ -369,7 +371,7 @@ public class MovieService {
                         .certificate(movie.getCertificate())
                         .language(movie.getLanguage())
                         .build())
-                .collect(Collectors.toList());
+                .collect(toList());
 
         return MoviePageResponseDTO.builder()
                 .movies(movies)
@@ -406,8 +408,8 @@ public class MovieService {
 
     @org.springframework.transaction.annotation.Transactional
     public void deleteUserReview(String userId, Long reviewId) {
-        MovieReview review = movieReviewRepo.findById(reviewId).orElseThrow(()->new ReviewNotFoundException("Review not found"));
-        if(!review.getUserId().equals(userId)){
+        MovieReview review = movieReviewRepo.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException("Review not found"));
+        if (!review.getUserId().equals(userId)) {
             throw new UnauthorizedActionException("You cannot modify this review");
         }
         movieReviewRepo.delete(review);
@@ -427,7 +429,7 @@ public class MovieService {
             throw new MovieInactiveException("Movie is not active");
         }
 
-        if (!review.getUserId().equals(userId)){
+        if (!review.getUserId().equals(userId)) {
             throw new UnauthorizedActionException("You cannot modify this review");
         }
 
@@ -447,5 +449,31 @@ public class MovieService {
                 .createdAt(savedReview.getCreatedAt())
                 .build();
 
+    }
+
+    @Transactional(readOnly = true)
+    public MovieSearchWrapperResponse searchMovieForAgent(String query) {
+        log.info("Search movie for agent request | name='{}'", query);
+
+        List<Movie> movies = movieRepo.findMovieForAgentByName(query);
+
+        List<MovieSearchResponseDto> movieDtos = movies.stream()
+                .map(movie -> MovieSearchResponseDto.builder()
+                        .movieCode(movie.getMovieCode())
+                        .movieName(movie.getMovieName())
+                        .movieAvatar(movie.getMovieAvatar())
+                        .language(movie.getLanguage())
+                        .certificate(movie.getCertificate())
+                        .build())
+                .toList();
+
+        String message = movies.isEmpty()
+                ? "No movies found"
+                : movies.size() + " movies found with name: " + query;
+
+        return MovieSearchWrapperResponse.builder()
+                .movies(movieDtos)
+                .message(message)
+                .build();
     }
 }

@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/movies")
 @RequiredArgsConstructor
@@ -71,5 +73,12 @@ public class MovieController {
 
         movieService.deleteUserReview(userId, reviewId);
         return ResponseEntity.noContent().build();
+    }
+
+    // Tool Api for agents to search movies
+    @GetMapping("/search/agent")
+    @ResponseStatus(HttpStatus.OK)
+    public MovieSearchWrapperResponse searchMoviesForAgents(@RequestParam(required = true)String query){
+        return movieService.searchMovieForAgent(query);
     }
 }
