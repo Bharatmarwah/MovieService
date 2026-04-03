@@ -76,9 +76,10 @@ public class MovieController {
     }
 
     // Tool Api for agents to search movies
-    @GetMapping("/search/agent")
+    @GetMapping(value = "/search/agent", produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
-    public MovieSearchWrapperResponse searchMoviesForAgents(@RequestParam(required = true)String query){
+    public MovieSearchWrapperResponse searchMoviesForAgents(
+            @RequestParam String query) {
         return movieService.searchMovieForAgent(query);
     }
 }
