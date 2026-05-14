@@ -23,7 +23,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -172,7 +171,7 @@ public class MovieService {
                 .build();
     }
 
-    @Cacheable(cacheNames = "movies", key = "#movieCode")
+    @Cacheable(cacheNames = "movieById", key = "#movieCode")
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public MovieResponseDTO getMovieById(String movieCode) {
 
