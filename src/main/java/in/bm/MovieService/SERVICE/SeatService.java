@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,10 @@ public class SeatService {
     private final ShowSeatRepo showSeatRepo;
 
 
-    @CacheEvict(cacheNames = "seats",allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "seats", allEntries = true),
+            @CacheEvict(cacheNames = "seatsById", allEntries = true)
+    })
     @Transactional
     public SeatBulkResponseDTO addSeats(@NotNull AddSeatRequestDTO dto) {
 
@@ -100,7 +104,10 @@ public class SeatService {
                 .build();
     }
 
-    @CacheEvict(cacheNames = "seats",allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "seats", allEntries = true),
+            @CacheEvict(cacheNames = "seatsById", allEntries = true)
+    })
     @Transactional
     public SeatCategoriesResponseDTO updateSeatCategories(Long seatId,
                                                           @Valid SeatCategoriesRequestDTO dto) {
@@ -172,7 +179,7 @@ public class SeatService {
                 .build();
     }
 
-    @Cacheable(cacheNames = "seats",key = "#seatId")
+    @Cacheable(cacheNames = "seatsById", key = "#seatId")
     @Transactional(readOnly = true)
     public SeatResponseDTO getSeatById(Long seatId) {
 
@@ -198,7 +205,10 @@ public class SeatService {
                 .build();
     }
 
-    @CacheEvict(cacheNames = "seats",allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "seats", allEntries = true),
+            @CacheEvict(cacheNames = "seatsById", allEntries = true)
+    })
     @Transactional
     public SeatLifeCycleResponseDTO deactivateSeat(Long seatId) {
 
@@ -237,7 +247,10 @@ public class SeatService {
                 .build();
     }
 
-    @CacheEvict(cacheNames = "seats",allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "seats", allEntries = true),
+            @CacheEvict(cacheNames = "seatsById", allEntries = true)
+    })
     @Transactional
     public SeatLifeCycleResponseDTO activateSeat(Long seatId) {
 
@@ -266,7 +279,10 @@ public class SeatService {
                 .build();
     }
 
-    @CacheEvict(cacheNames = "seats",allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "seats", allEntries = true),
+            @CacheEvict(cacheNames = "seatsById", allEntries = true)
+    })
     @Transactional
     public SeatResponseDTO updateSeat(Long seatId, @Valid SeatRequestDTO dto) {
 
@@ -331,7 +347,10 @@ public class SeatService {
                 .build();
     }
 
-    @CacheEvict(cacheNames = "seats",allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "seats", allEntries = true),
+            @CacheEvict(cacheNames = "seatsById", allEntries = true)
+    })
     @Transactional
     public void deleteSeat(Long seatId) {
 

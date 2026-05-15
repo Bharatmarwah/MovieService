@@ -7,6 +7,8 @@ import java.time.Instant;
 
 @Getter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class MovieReviewDto {
 
     private long id;

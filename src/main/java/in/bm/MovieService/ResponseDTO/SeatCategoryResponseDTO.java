@@ -1,10 +1,12 @@
 package in.bm.MovieService.ResponseDTO;
 
 import in.bm.MovieService.ENTITY.SeatType;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class SeatCategoryResponseDTO {
 

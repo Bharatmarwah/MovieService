@@ -38,6 +38,7 @@ public class TheaterService {
 
     @Caching(evict = {
             @CacheEvict(cacheNames = "theaters", allEntries = true),
+            @CacheEvict(cacheNames = "theatersById", allEntries = true),
             @CacheEvict(cacheNames = "theaterDetails", allEntries = true)
     })
     @Transactional
@@ -115,6 +116,7 @@ public class TheaterService {
 
     @Caching(evict = {
             @CacheEvict(cacheNames = "theaters", allEntries = true),
+            @CacheEvict(cacheNames = "theatersById", allEntries = true),
             @CacheEvict(cacheNames = "theaterDetails", allEntries = true)
     })
     @Transactional
@@ -146,6 +148,7 @@ public class TheaterService {
 
     @Caching(evict = {
             @CacheEvict(cacheNames = "theaters", allEntries = true),
+            @CacheEvict(cacheNames = "theatersById", allEntries = true),
             @CacheEvict(cacheNames = "theaterDetails", allEntries = true)
     })
     @Transactional
@@ -250,6 +253,7 @@ public class TheaterService {
                 .build();
     }
 
+    @Cacheable(cacheNames = "theatersById",key = "#theaterCode")
     @Transactional
     public TheaterResponseDTO getTheaterById(String theaterCode, double latitude, double longitude) {
 
@@ -440,6 +444,15 @@ public class TheaterService {
                 .build();
     }
 
+    @Cacheable(
+            cacheNames = "theaters",
+            key = "'MOVIE:' + #movieCode + " +
+                    "':CITY:' + #city + " +
+                    "':DATE:' + #date + " +
+                    "':PRICE:' + #seatPrice + " +
+                    "':PAGE:' + #page + " +
+                    "':SIZE:' + #size"
+    )
     @Transactional
     public TheaterFilterPageResponseDTO searchFilter(
             String movieCode,

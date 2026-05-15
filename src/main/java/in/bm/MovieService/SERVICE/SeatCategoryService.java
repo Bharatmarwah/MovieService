@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,10 @@ public class SeatCategoryService {
     private final ScreenRepo screenRepo;
 
 
-    @CacheEvict(cacheNames = "seatCategories",allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "seatCategories", allEntries = true),
+            @CacheEvict(cacheNames = "seatCategoriesById", allEntries = true)
+    })
     @Transactional
     public SeatCategoryResponseDTO addSeatCategory(@Valid SeatCategoryRequestDTO dto) {
 
@@ -80,7 +84,10 @@ public class SeatCategoryService {
                 .build();
     }
 
-    @CacheEvict(cacheNames = "seatCategories",allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "seatCategories", allEntries = true),
+            @CacheEvict(cacheNames = "seatCategoriesById", allEntries = true)
+    })
     @Transactional
     public SeatCategoryResponseDTO updateSeatCategory(
             @Valid SeatCategoryRequestDTO dto,
@@ -131,7 +138,10 @@ public class SeatCategoryService {
                 .build();
     }
 
-    @CacheEvict(cacheNames = "seatCategories",allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "seatCategories", allEntries = true),
+            @CacheEvict(cacheNames = "seatCategoriesById", allEntries = true)
+    })
     @Transactional
     public void deleteSeatCategory(Long seatCategoryId) {
 
@@ -148,7 +158,7 @@ public class SeatCategoryService {
         log.info("Seat category deleted | seatCategoryId={}", seatCategoryId);
     }
 
-    @Cacheable(cacheNames = "seatCategories",key = "#seatCategoryId")
+    @Cacheable(cacheNames = "seatCategoriesById",key = "#seatCategoryId")
     @Transactional(readOnly = true)
     public SeatCategoryResponseDTO getSeatCategoryById(Long seatCategoryId) {
 
