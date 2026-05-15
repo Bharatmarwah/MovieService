@@ -171,7 +171,7 @@ public class MovieService {
                 .build();
     }
 
-    @Cacheable(cacheNames = "movieById", key = "#movieCode")
+    @Cacheable(cacheNames = "moviesById", key = "#movieCode")
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public MovieResponseDTO getMovieById(String movieCode) {
 

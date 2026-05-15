@@ -1,10 +1,9 @@
 package in.bm.MovieService.CONFIG;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import in.bm.MovieService.ResponseDTO.MovieDetailsResponseDTO;
-import in.bm.MovieService.ResponseDTO.MoviePageResponseDTO;
-import in.bm.MovieService.ResponseDTO.MovieResponseDTO;
+import in.bm.MovieService.ResponseDTO.*;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +30,7 @@ public class RedisConfig {
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         RedisCacheConfiguration config =
                 RedisCacheConfiguration.defaultCacheConfig()
@@ -59,13 +59,21 @@ public class RedisConfig {
                         .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new Jackson2JsonRedisSerializer<>(mapper, MovieDetailsResponseDTO.class))));
 
 
-        cacheConfig.put("movieById", config.entryTtl(Duration.ofDays(1)).disableCachingNullValues()
+        cacheConfig.put("moviesById", config.entryTtl(Duration.ofDays(1)).disableCachingNullValues()
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new Jackson2JsonRedisSerializer<>(mapper, MovieResponseDTO.class))));
 
-// todo: pending
 
-        cacheConfig.put("shows", config.entryTtl(Duration.ofHours(1)));
+        cacheConfig.put("shows", config.entryTtl(Duration.ofHours(1))
+                .disableCachingNullValues().serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new Jackson2JsonRedisSerializer<>(mapper, ShowPageResponseDTO.class))));
+
+        cacheConfig.put("showsById", config.entryTtl(Duration.ofHours(1))
+                .disableCachingNullValues().serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new Jackson2JsonRedisSerializer<>(mapper, ShowResponseDTO.class))));
+
+
+        // todo: pending
 
         cacheConfig.put("theaters", config.entryTtl(Duration.ofHours(12)).disableCachingNullValues()
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))

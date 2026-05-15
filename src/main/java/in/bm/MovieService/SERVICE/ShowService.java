@@ -174,7 +174,7 @@
         }
 
         // getting the show by id
-        @Cacheable(cacheNames = "shows",key = "#showId")
+        @Cacheable(cacheNames = "showsById",key = "#showId")
         public ShowResponseDTO getShowById(Long showId) {
 
             Show show = showRepo.findById(showId)
@@ -198,7 +198,7 @@
 
         // getting shows by movieCode and city
         @Cacheable(
-                cacheNames = "shows",
+                cacheNames = "showsByMovieAndCity",
                 key = "'MOVIE:' + #movieCode +':'+ #city")
         public List<ShowDateTimeResponseDTO> getShowsByMovieAndCity(String movieCode, String city) {
 
