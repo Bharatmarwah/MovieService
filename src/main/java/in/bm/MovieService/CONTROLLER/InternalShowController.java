@@ -15,7 +15,6 @@ public class InternalShowController {
 
     private final InternalShowBookingService showBookingService;
 
-
     @PostMapping("/validate")
     @ResponseStatus(HttpStatus.OK)
     public InternalShowResponse validateShowForBooking(

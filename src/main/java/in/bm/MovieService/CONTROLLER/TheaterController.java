@@ -25,7 +25,7 @@ public class TheaterController {
     @GetMapping("/{theaterCode}")
     public ResponseEntity<TheaterResponseDTO> getTheaterById(
             @PathVariable String theaterCode,
-            @RequestParam double latitude,
+            @RequestParam double latitude,  
             @RequestParam double longitude) {
 
         return ResponseEntity.ok(
