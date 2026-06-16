@@ -5,6 +5,7 @@ import in.bm.MovieService.EXCEPTION.*;
 import in.bm.MovieService.REPO.MovieDetailsRepo;
 import in.bm.MovieService.REPO.MovieRepo;
 import in.bm.MovieService.REPO.MovieReviewRepo;
+import in.bm.MovieService.RequestDTO.MovieFilterRequest;
 import in.bm.MovieService.RequestDTO.MovieRequestDTO;
 import in.bm.MovieService.RequestDTO.MovieReviewRequestDTO;
 import in.bm.MovieService.ResponseDTO.*;
@@ -474,5 +475,43 @@ public class MovieService {
                 .movies(movieDtos)
                 .message(message)
                 .build();
+    }
+
+    public List<MovieDataResponse> fetchMoviesData(
+            MovieFilterRequest filter) {
+
+        if(filter.getCastOrCrewsNames() != null) {
+            filter.setCastOrCrewsNames(
+                    filter.getCastOrCrewsNames()
+                            .stream()
+                            .map(String::toLowerCase)
+                            .toList()
+            );
+        }
+        List<Movie> movieData = movieRepo.findMovieData(
+                filter.getMovieName(),
+                filter.getCertificate(),
+                filter.getLanguage(),
+                filter.getMovieType(),
+                filter.getCastOrCrewsNames(),
+                filter.getSort()
+        );
+
+
+        return movieData.stream()
+                .map(movie -> MovieDataResponse.builder()
+                        .movieName(movie.getMovieName())
+                        .posters(movie.getMovieDetails().getPosters())
+                        .duration(movie.getDuration())
+                        .language(movie.getLanguage())
+                        .certification(movie.getCertificate())
+                        .movieAvatar(movie.getMovieAvatar())
+                        .avgRating(movie.getMovieDetails().getAvgRating())
+                        .totalReviews(movie.getMovieDetails().getTotalReviews())
+                        .synopsis(movie.getMovieDetails().getSynopsis())
+                        .movieType(movie.getMovieDetails().getMovieType())
+                        .castAndCrew(movie.getMovieDetails().getCastAndCrew())
+                        .build())
+                .toList();
     }
 }

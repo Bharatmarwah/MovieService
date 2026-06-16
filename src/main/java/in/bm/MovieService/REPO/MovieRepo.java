@@ -2,6 +2,7 @@ package in.bm.MovieService.REPO;
 
 import in.bm.MovieService.ENTITY.Movie;
 import in.bm.MovieService.ENTITY.MovieStatus;
+import in.bm.MovieService.ResponseDTO.MovieDataResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,17 +17,17 @@ import java.util.List;
 public interface MovieRepo extends JpaRepository<Movie, String> {
 
     @Query("""
-    SELECT DISTINCT m
-    FROM Movie m
-    JOIN m.movieDetails md
-    LEFT JOIN md.movieType mt
-    WHERE m.status = :status
-      AND (
-            LOWER(m.movieName) LIKE LOWER(CONCAT(:q, '%'))
-         OR LOWER(mt) LIKE LOWER(CONCAT(:q, '%'))
-         OR LOWER(m.language) LIKE LOWER(CONCAT(:q, '%'))
-      )
-""")
+                SELECT DISTINCT m
+                FROM Movie m
+                JOIN m.movieDetails md
+                LEFT JOIN md.movieType mt
+                WHERE m.status = :status
+                  AND (
+                        LOWER(m.movieName) LIKE LOWER(CONCAT(:q, '%'))
+                     OR LOWER(mt) LIKE LOWER(CONCAT(:q, '%'))
+                     OR LOWER(m.language) LIKE LOWER(CONCAT(:q, '%'))
+                  )
+            """)
     Page<Movie> searchAcrossFields(
             @Param("status") MovieStatus status,
             @Param("q") String q,
@@ -37,5 +38,67 @@ public interface MovieRepo extends JpaRepository<Movie, String> {
 
     @Query(value = "SELECT * FROM movies WHERE movie_name LIKE %:name% LIMIT 3", nativeQuery = true)
     List<Movie> findMovieForAgentByName(String name);
+
+
+    @Query("""
+            SELECT m
+            FROM Movie m
+            JOIN m.movieDetails md
+            WHERE
+                m.status = in.bm.MovieService.ENTITY.MovieStatus.ACTIVE
+            
+            AND (
+                :movieName IS NULL
+                OR LOWER(m.movieName) LIKE LOWER(CONCAT('%', :movieName, '%'))
+            )
+            
+            AND (
+                :certificate IS NULL
+                OR m.certificate = :certificate
+            )
+            
+            AND (
+                :language IS NULL
+                OR LOWER(m.language) = LOWER(:language)
+            )
+            
+            AND (
+                :movieType IS NULL
+                OR EXISTS (
+                    SELECT 1
+                    FROM md.movieType mt
+                    WHERE mt IN :movieType
+                )
+            )
+            
+            AND (
+                :castOrCrewsNames IS NULL
+                OR EXISTS (
+                    SELECT 1
+                    FROM md.castAndCrew cc
+                    WHERE LOWER(KEY(cc)) IN :castOrCrewsNames
+                )
+            )
+            
+            ORDER BY
+            
+            CASE
+                WHEN :sort = 'HIGHEST_RATED'
+                THEN md.avgRating
+            END DESC,
+            
+            CASE
+                WHEN :sort = 'MOST_REVIEWED'
+                THEN md.totalReviews
+            END DESC
+            """)
+    List<Movie> findMovieData(
+            @Param("movieName") String movieName,
+            @Param("certificate") String certificate,
+            @Param("language") String language,
+            @Param("movieType") List<String> movieType,
+            @Param("castOrCrewsNames") List<String> castOrCrewsNames,
+            @Param("sort") String sort
+    );
 }
 

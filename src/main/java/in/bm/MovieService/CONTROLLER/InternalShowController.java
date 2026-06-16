@@ -19,7 +19,6 @@ public class InternalShowController {
     @ResponseStatus(HttpStatus.OK)
     public InternalShowResponse validateShowForBooking(
             @Valid @RequestBody InternalShowRequestDTO showRequestDTO) {
-
         return showBookingService.validateShowForBooking(showRequestDTO);
     }
 }
