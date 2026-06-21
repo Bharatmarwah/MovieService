@@ -9,6 +9,7 @@ import in.bm.MovieService.RequestDTO.MovieFilterRequest;
 import in.bm.MovieService.RequestDTO.MovieRequestDTO;
 import in.bm.MovieService.RequestDTO.MovieReviewRequestDTO;
 import in.bm.MovieService.ResponseDTO.*;
+import in.bm.MovieService.UTILS.VectorSyncPublisher;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
@@ -35,6 +37,7 @@ public class MovieService {
     private final MovieRepo movieRepo;
     private final MovieDetailsRepo movieDetailsRepo;
     private final MovieReviewRepo movieReviewRepo;
+    private final VectorSyncPublisher vectorSyncPublisher;
 
     @Cacheable(
             cacheNames = "movies",
@@ -156,6 +159,8 @@ public class MovieService {
         log.info("Movie created | movieCode={} status={}",
                 savedMovie.getMovieCode(), savedMovie.getStatus());
 
+        vectorSyncPublisher.upsertMovie(savedMovie.getMovieCode());
+
         return MovieInfoDTO.builder()
                 .movieCode(savedMovie.getMovieCode())
                 .movieName(savedMovie.getMovieName())
@@ -231,6 +236,8 @@ public class MovieService {
         log.info("Review added | reviewId={} movieCode={}",
                 savedReview.getId(), movieCode);
 
+        vectorSyncPublisher.upsertMovie(movieCode);
+
         return MovieReviewDto.builder()
                 .id(savedReview.getId())
                 .username(savedReview.getUsername())
@@ -260,6 +267,8 @@ public class MovieService {
         movie.setStatus(MovieStatus.ACTIVE);
 
         log.info("Movie activated | movieCode={}", movieCode);
+
+        vectorSyncPublisher.upsertMovie(movieCode);
 
         return MovieStatusDTO.builder()
                 .movieCode(movieCode)
@@ -309,6 +318,8 @@ public class MovieService {
 
         log.info("Movie updated successfully | movieCode={}", movieCode);
 
+        vectorSyncPublisher.upsertMovie(movieCode);
+
         return MovieInfoDTO.builder()
                 .movieCode(movie.getMovieCode())
                 .movieName(movie.getMovieName())
@@ -345,6 +356,8 @@ public class MovieService {
         movie.setStatus(MovieStatus.INACTIVE);
 
         log.info("Movie deactivated | movieCode={}", movieCode);
+
+        vectorSyncPublisher.upsertMovie(movieCode);
 
         return MovieStatusDTO.builder()
                 .movieCode(movieCode)
@@ -413,6 +426,8 @@ public class MovieService {
             throw new UnauthorizedActionException("You cannot modify this review");
         }
         movieReviewRepo.delete(review);
+        updateMovieRating(review.getMovieDetails());
+        vectorSyncPublisher.upsertMovie(review.getMovieDetails().getMovie().getMovieCode());
     }
 
     public MovieReviewDto editReview(long reviewId, @Valid MovieReviewRequestDTO dto, String userId) {
@@ -438,6 +453,10 @@ public class MovieService {
         review.setRating(dto.getRating());
 
         MovieReview savedReview = movieReviewRepo.save(review);
+
+        updateMovieRating(review.getMovieDetails());
+
+        vectorSyncPublisher.upsertMovie(review.getMovieDetails().getMovie().getMovieCode());
 
         log.info("Review updated | reviewId={}", reviewId);
 
@@ -477,10 +496,11 @@ public class MovieService {
                 .build();
     }
 
+
     public List<MovieDataResponse> fetchMoviesData(
             MovieFilterRequest filter) {
 
-        if(filter.getCastOrCrewsNames() != null) {
+        if (filter.getCastOrCrewsNames() != null) {
             filter.setCastOrCrewsNames(
                     filter.getCastOrCrewsNames()
                             .stream()
@@ -511,7 +531,50 @@ public class MovieService {
                         .synopsis(movie.getMovieDetails().getSynopsis())
                         .movieType(movie.getMovieDetails().getMovieType())
                         .castAndCrew(movie.getMovieDetails().getCastAndCrew())
+                        .status(movie.getStatus())
                         .build())
                 .toList();
+    }
+
+    public List<MovieDataResponse> fetchAllMoviesData() {
+        List<Movie> moviesData = movieRepo.findAll();
+        return moviesData.stream()
+                .map(movie -> MovieDataResponse.builder()
+                        .movieCode(movie.getMovieCode())
+                        .movieName(movie.getMovieName())
+                        .posters(movie.getMovieDetails().getPosters())
+                        .duration(movie.getDuration())
+                        .language(movie.getLanguage())
+                        .certification(movie.getCertificate())
+                        .movieAvatar(movie.getMovieAvatar())
+                        .avgRating(movie.getMovieDetails().getAvgRating())
+                        .totalReviews(movie.getMovieDetails().getTotalReviews())
+                        .synopsis(movie.getMovieDetails().getSynopsis())
+                        .movieType(movie.getMovieDetails().getMovieType())
+                        .castAndCrew(movie.getMovieDetails().getCastAndCrew())
+                        .status(movie.getStatus())
+                        .build())
+                .toList();
+    }
+
+    public MovieDataResponse fetchMovieDataByCode(String movieCode) {
+        Movie movie = movieRepo
+                .findById(movieCode)
+                .orElseThrow(() -> new MovieNotFoundException("Movie not found with code: " + movieCode));
+        return MovieDataResponse.builder()
+                .movieCode(movie.getMovieCode())
+                .movieName(movie.getMovieName())
+                .posters(movie.getMovieDetails().getPosters())
+                .duration(movie.getDuration())
+                .language(movie.getLanguage())
+                .certification(movie.getCertificate())
+                .movieAvatar(movie.getMovieAvatar())
+                .avgRating(movie.getMovieDetails().getAvgRating())
+                .totalReviews(movie.getMovieDetails().getTotalReviews())
+                .synopsis(movie.getMovieDetails().getSynopsis())
+                .movieType(movie.getMovieDetails().getMovieType())
+                .castAndCrew(movie.getMovieDetails().getCastAndCrew())
+                .status(movie.getStatus())
+                .build();
     }
 }

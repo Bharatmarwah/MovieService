@@ -12,5 +12,6 @@ public class MovieFilterRequest {
     private String language;
     private List<String> movieType;
     private List<String> castOrCrewsNames;
+    private String status;
     private String sort;
 }

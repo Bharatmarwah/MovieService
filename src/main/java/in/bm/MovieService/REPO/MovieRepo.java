@@ -2,7 +2,6 @@ package in.bm.MovieService.REPO;
 
 import in.bm.MovieService.ENTITY.Movie;
 import in.bm.MovieService.ENTITY.MovieStatus;
-import in.bm.MovieService.ResponseDTO.MovieDataResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -44,10 +43,7 @@ public interface MovieRepo extends JpaRepository<Movie, String> {
             SELECT m
             FROM Movie m
             JOIN m.movieDetails md
-            WHERE
-                m.status = in.bm.MovieService.ENTITY.MovieStatus.ACTIVE
-            
-            AND (
+            WHERE (
                 :movieName IS NULL
                 OR LOWER(m.movieName) LIKE LOWER(CONCAT('%', :movieName, '%'))
             )
@@ -79,7 +75,6 @@ public interface MovieRepo extends JpaRepository<Movie, String> {
                     WHERE LOWER(KEY(cc)) IN :castOrCrewsNames
                 )
             )
-            
             ORDER BY
             
             CASE
