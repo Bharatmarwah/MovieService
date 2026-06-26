@@ -83,6 +83,11 @@ public interface MovieRepo extends JpaRepository<Movie, String> {
             END DESC,
             
             CASE
+                WHEN :sort = 'MOST_RECENT'
+                THEN m.movieCode
+            END DESC,
+            
+            CASE
                 WHEN :sort = 'MOST_REVIEWED'
                 THEN md.totalReviews
             END DESC

@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
@@ -259,6 +258,7 @@ public class MovieService {
         Movie movie = movieRepo.findById(movieCode)
                 .orElseThrow(() -> new MovieNotFoundException("Movie not found"));
 
+
         if (movie.getStatus() == MovieStatus.ACTIVE) {
             log.warn("Activation rejected | already active movieCode={}", movieCode);
             throw new IllegalStateException("Movie is already active");
@@ -355,7 +355,7 @@ public class MovieService {
 
         movie.setStatus(MovieStatus.INACTIVE);
 
-        log.info("Movie deactivated | movieCode={}", movieCode);
+        log.info("Movie deactivated     | movieCode={}", movieCode);
 
         vectorSyncPublisher.upsertMovie(movieCode);
 
@@ -500,6 +500,8 @@ public class MovieService {
     public List<MovieDataResponse> fetchMoviesData(
             MovieFilterRequest filter) {
 
+        System.out.println(filter.getSort());
+
         if (filter.getCastOrCrewsNames() != null) {
             filter.setCastOrCrewsNames(
                     filter.getCastOrCrewsNames()
@@ -520,6 +522,7 @@ public class MovieService {
 
         return movieData.stream()
                 .map(movie -> MovieDataResponse.builder()
+                        .movieCode(movie.getMovieCode())
                         .movieName(movie.getMovieName())
                         .posters(movie.getMovieDetails().getPosters())
                         .duration(movie.getDuration())
@@ -562,6 +565,7 @@ public class MovieService {
                 .findById(movieCode)
                 .orElseThrow(() -> new MovieNotFoundException("Movie not found with code: " + movieCode));
         return MovieDataResponse.builder()
+                .movieCode(movie.getMovieCode())
                 .movieCode(movie.getMovieCode())
                 .movieName(movie.getMovieName())
                 .posters(movie.getMovieDetails().getPosters())
